@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000" # Map frontend to localhost:3000
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000" # Map backend to localhost:8000
+    depends_on:
+      - mongodb
+    volumes:
+      - ./backend:/app
+
+  mongodb:
+    image: mongo:6
+    container_name: mongodb
+    ports:
+      - "27017:27017" # MongoDB default port
+    volumes:
+      - mongodb-data:/data/db
+
+volumes:
+  mongodb-data:
