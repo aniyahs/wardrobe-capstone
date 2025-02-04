@@ -1,1 +1,0 @@
-//Displays the outfit suggestions 
