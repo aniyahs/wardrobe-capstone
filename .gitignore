@@ -15,3 +15,5 @@ docker-data/
 
 # CV for Image processing + classification 
 model-training/
+
+package.json
