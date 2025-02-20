@@ -13,7 +13,7 @@ __pycache__/
 # Docker volumes
 docker-data/
 
-# CV for Image processing + classification 
-model-training/
+# Aniyah's virtual environment 
+venv/
 
 package.json

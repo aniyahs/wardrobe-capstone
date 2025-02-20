@@ -1,3 +1,4 @@
+# entry point for the Flask API
 # main application folder
 from flask import Flask
 from app.routes.users import users_bp  # Import users blueprint
