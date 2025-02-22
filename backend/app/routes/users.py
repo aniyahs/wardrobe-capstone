@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from database import users_collection
+from app.database import users_collection
 from werkzeug.security import generate_password_hash
 from pymongo.errors import DuplicateKeyError
 
