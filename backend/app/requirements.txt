@@ -2,3 +2,5 @@ fastapi
 uvicorn
 pymongo
 python-multipart
+werkzeug
+flask
