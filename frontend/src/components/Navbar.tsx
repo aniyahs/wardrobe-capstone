@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
+import { globalStyles } from "../styles/styles";
 
 interface NavbarProps {
   setScreen: (screen: string) => void;
@@ -7,37 +8,28 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({ setScreen }) => {
   return (
-    <View style={styles.navbar}>
-      <Pressable onPress={() => setScreen("Home")} style={styles.navButton}>
-        <Text style={styles.navText}>Home</Text>
+    <View style={globalStyles.navbar}>
+      <Pressable onPress={() => setScreen("Home")} style={globalStyles.navButton}>
+        <Text style={globalStyles.navText}>Home</Text>
       </Pressable>
-      <Pressable onPress={() => setScreen("Login")} style={styles.navButton}>
-        <Text style={styles.navText}>Login</Text>
+      <Pressable onPress={() => setScreen("Login")} style={globalStyles.navButton}>
+        <Text style={globalStyles.navText}>Login</Text>
       </Pressable>
-      <Pressable onPress={() => setScreen("Signup")} style={styles.navButton}>
-        <Text style={styles.navText}>Signup</Text>
+      <Pressable onPress={() => setScreen("Signup")} style={globalStyles.navButton}>
+        <Text style={globalStyles.navText}>Signup</Text>
+      </Pressable>
+      <Pressable onPress={() => setScreen("Gallery")} style={globalStyles.navButton}>
+        <Text style={globalStyles.navText}>Gallery</Text>
+      </Pressable>
+      <Pressable onPress={() => setScreen("Upload")} style={globalStyles.navButton}>
+        <Text style={globalStyles.navText}>Upload</Text>
+      </Pressable>
+      <Pressable onPress={() => setScreen("Profile")} style={globalStyles.navButton}>
+        <Text style={globalStyles.navText}>Profile</Text>
       </Pressable>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  navbar: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-    backgroundColor: "#222",
-    padding: 15,
-    position: "absolute",
-    bottom: 0,
-    width: "100%",
-  },
-  navButton: {
-    padding: 10,
-  },
-  navText: {
-    color: "#fff",
-    fontSize: 16,
-  },
-});
 
 export default Navbar;
