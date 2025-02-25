@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
 
-const Login = ({ navigation }: any) => {
+const Login = () => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -11,8 +11,6 @@ const Login = ({ navigation }: any) => {
       setMessage("Please enter your credentials.");
       return;
     }
-
-    // Placeholder logic for authentication (replace with API call)
     if (name === "test" && password === "password") {
       setMessage("Login successful!");
     } else {
@@ -23,29 +21,11 @@ const Login = ({ navigation }: any) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
-
-      <TextInput
-        style={styles.input}
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
-
+      <TextInput style={styles.input} placeholder="Name" value={name} onChangeText={setName} />
+      <TextInput style={styles.input} placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry />
       {message ? <Text style={styles.message}>{message}</Text> : null}
-
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Login</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-        <Text style={styles.link}>Don't have an account? Sign Up</Text>
       </TouchableOpacity>
     </View>
   );
@@ -59,6 +39,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#f5f5f5",
+    paddingBottom: 60,
   },
   title: {
     fontSize: 24,
@@ -91,10 +72,5 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     color: "red",
     fontWeight: "bold",
-  },
-  link: {
-    marginTop: 10,
-    color: "#007bff",
-    textDecorationLine: "underline",
   },
 });
