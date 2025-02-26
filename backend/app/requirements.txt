@@ -4,3 +4,7 @@ pymongo
 python-multipart
 werkzeug
 flask
+preprocess
+numpy
+tensorflow
+opencv-python
