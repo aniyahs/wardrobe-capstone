@@ -1,11 +1,10 @@
 # wardrobe-realted routes
+from flask import Blueprint, request, jsonify
+from app.database import wardrobe_collection
 
-from flask import Flask, request, jsonify
-from database import wardrobe_collection
+wardrobe_bp = Blueprint("wardrobe", __name__)
 
-app = Flask(__name__)
-
-@app.route("/add-item", methods=["POST"])
+@wardrobe_bp.route("/add-item", methods=["POST"])
 def add_item():
     data = request.json
     
