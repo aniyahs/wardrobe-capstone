@@ -8,3 +8,4 @@ preprocess
 numpy
 tensorflow
 opencv-python
+dotenv
