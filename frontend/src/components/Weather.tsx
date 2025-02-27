@@ -1,6 +1,7 @@
 // src/components/Weather.tsx
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { globalStyles } from '../styles/styles';
 import axios from 'axios';
 
 interface CurrentWeather {
@@ -15,16 +16,13 @@ const Weather: React.FC = () => {
   useEffect(() => {
     const fetchWeather = async () => {
       try {
-        const response = await axios.get(
-          'https://api.open-meteo.com/v1/forecast',
-          {
-            params: {
-              latitude: 41.5055, // Latitude for Cleveland
-              longitude: -81.6813, // Longitude for Cleveland
-              current_weather: true, // Get current weather
-            },
-          }
-        );
+        const response = await axios.get('https://api.open-meteo.com/v1/forecast', {
+          params: {
+            latitude: 41.5055, // Latitude for Cleveland
+            longitude: -81.6813, // Longitude for Cleveland
+            current_weather: true, // Get current weather
+          },
+        });
         setWeatherData(response.data.current_weather);
       } catch (err) {
         setError('Failed to fetch weather data');
@@ -35,77 +33,68 @@ const Weather: React.FC = () => {
   }, []);
 
   if (error) {
-    return <Text style={styles.error}>{error}</Text>;
+    return <Text style={globalStyles.errorMessage}>{error}</Text>;
   }
 
   if (!weatherData) {
     return <Text>Loading...</Text>;
   }
-
-  const temperature = (weatherData.temperature * 9) / 5 + 32;
+  // Convert to Fahrenheit
+  const temperature = Math.round((weatherData.temperature * 9) / 5 + 32); 
+  
   const conditionCode = weatherData.weathercode;
-  const condition = getConditionDescription(conditionCode);
+  const { emoji, description } = getWeatherEmojiAndDescription(conditionCode);
 
   return (
-    <View style={styles.weatherContainer}>
-      <Text style={styles.weatherText}>Current Weather in Cleveland:</Text>
-      <Text style={styles.weatherText}>{condition}</Text>
-      <Text style={styles.weatherText}>{temperature}°F</Text>
+    <View style={globalStyles.weatherContainer}>
+      <Text style={globalStyles.weatherText}>Current Weather in Cleveland:</Text>
+      <View style={globalStyles.weatherRow}>
+        <Text style={globalStyles.weatherEmoji}>{emoji}</Text>
+        <View style={globalStyles.weatherInfo}>
+          <Text style={globalStyles.weatherText}>{description}</Text>
+          <Text style={globalStyles.weatherText}>{temperature}°F</Text>
+        </View>
+      </View>
     </View>
   );
 };
 
-// Helper function to convert weather code to description
-const getConditionDescription = (code: number): string => {
+// Helper function to map weather code to emoji and description
+const getWeatherEmojiAndDescription = (code: number) => {
   switch (code) {
     case 0:
-      return 'Clear sky';
+      return { emoji: '☀️', description: 'Clear sky' };
     case 1:
-      return 'Mainly clear';
+      return { emoji: '🌤️', description: 'Mainly clear' };
     case 2:
-      return 'Partly cloudy';
+      return { emoji: '⛅', description: 'Partly cloudy' };
     case 3:
-      return 'Overcast';
+      return { emoji: '☁️', description: 'Overcast' };
     case 45:
-      return 'Fog';
+      return { emoji: '🌫️', description: 'Fog' };
     case 48:
-      return 'Depositing rime fog';
+      return { emoji: '🌫️', description: 'Depositing rime fog' };
     case 51:
-      return 'Light drizzle';
+      return { emoji: '🌧️', description: 'Light drizzle' };
     case 53:
-      return 'Moderate drizzle';
+      return { emoji: '🌧️', description: 'Moderate drizzle' };
     case 55:
-      return 'Heavy drizzle';
+      return { emoji: '🌧️', description: 'Heavy drizzle' };
     case 61:
-      return 'Light rain';
+      return { emoji: '🌦️', description: 'Light rain' };
     case 63:
-      return 'Moderate rain';
+      return { emoji: '🌦️', description: 'Moderate rain' };
     case 65:
-      return 'Heavy rain';
+      return { emoji: '🌧️', description: 'Heavy rain' };
     case 71:
-      return 'Light snow';
+      return { emoji: '❄️', description: 'Light snow' };
     case 73:
-      return 'Moderate snow';
+      return { emoji: '❄️', description: 'Moderate snow' };
     case 75:
-      return 'Heavy snow';
+      return { emoji: '❄️', description: 'Heavy snow' };
     default:
-      return 'Unknown condition';
+      return { emoji: '❓', description: 'Unknown condition' };
   }
 };
-
-const styles = StyleSheet.create({
-  weatherContainer: {
-    marginTop: 20,
-    alignItems: 'center',
-  },
-  weatherText: {
-    fontSize: 18,
-    color: '#333',
-  },
-  error: {
-    color: 'red',
-    textAlign: 'center',
-  },
-});
 
 export default Weather;

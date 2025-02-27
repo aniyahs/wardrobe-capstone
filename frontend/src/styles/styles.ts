@@ -68,6 +68,7 @@ export const globalStyles = StyleSheet.create({
   },
   errorMessage: {
     color: "red",
+    textAlign: 'center'
   },
   successMessage: {
     color: "green",
@@ -141,4 +142,23 @@ export const globalStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  weatherContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  weatherRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  weatherInfo: {
+    marginLeft: 10,
+  },
+  weatherText: {
+    fontSize: 18,
+    color: '#333',
+  },
+  weatherEmoji: {
+    fontSize: 50,
+  }
 });
