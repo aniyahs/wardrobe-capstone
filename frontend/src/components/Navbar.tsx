@@ -12,12 +12,15 @@ const Navbar: React.FC<NavbarProps> = ({ setScreen }) => {
       <Pressable onPress={() => setScreen("Home")} style={globalStyles.navButton}>
         <Text style={globalStyles.navText}>Home</Text>
       </Pressable>
+      {/*
+        Leaving in case needed for testing
+
       <Pressable onPress={() => setScreen("Login")} style={globalStyles.navButton}>
         <Text style={globalStyles.navText}>Login</Text>
       </Pressable>
       <Pressable onPress={() => setScreen("Signup")} style={globalStyles.navButton}>
         <Text style={globalStyles.navText}>Signup</Text>
-      </Pressable>
+      </Pressable>*/}
       <Pressable onPress={() => setScreen("Gallery")} style={globalStyles.navButton}>
         <Text style={globalStyles.navText}>Gallery</Text>
       </Pressable>

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Image, FlatList, StyleSheet, Dimensions } from "react-native";
+import { View, Image, FlatList, ScrollView, Dimensions } from "react-native";
 import { globalStyles } from "../styles/styles";
 
 const images = [
@@ -51,14 +51,14 @@ const Gallery = () => {
       keyExtractor={(item, index) => index.toString()}
       numColumns={3} // Forces 3 images per row
       renderItem={({ item }) => (
-        <View style={{margin: 5, width: imageSize, height: imageSize }}>
+        <View style={{ margin: 5, width: imageSize, height: imageSize }}>
           <Image source={{ uri: item }} style={globalStyles.image} />
         </View>
       )}
       contentContainerStyle={globalStyles.container}
+      showsVerticalScrollIndicator={false} // Hide the vertical scroll indicator
     />
   );
 };
 
 export default Gallery;
-        
