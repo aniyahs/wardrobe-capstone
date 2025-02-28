@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Replace with your MongoDB Atlas connection string
-MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://AniyahShirehini:DBWardrobeManager@wardrobecluster.mongodb.net/WardrobeManager?retryWrites=true&w=majority")
+MONGO_URI = os.getenv("MONGO_URI")
 
 client = MongoClient(MONGO_URI)
 db = client["WardrobeManager"] 
