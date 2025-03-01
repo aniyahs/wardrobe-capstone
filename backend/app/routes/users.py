@@ -13,7 +13,7 @@ from app.routes.auth import login_required
 users_bp = Blueprint("users", __name__)
 CORS(users_bp) # should allow frontend requests
 
-# Endpoint to create an account 
+# Endpoint to create an account
 @users_bp.route("/register", methods=["POST"])
 def register_user():
     data = request.json
@@ -37,10 +37,9 @@ def register_user():
     users_collection.insert_one(user)
     return jsonify({"message": "User created successfully"}), 201
 
-# Endpoint to allow users to login with an existing account 
+# Endpoint to allow users to login with an existing account
 @users_bp.route("/login", methods=["POST"])
 def login_user():
-    print("Login endpoint hit")  # Debugging line
     data = request.json
     user = users_collection.find_one({"email": data["email"]})
 
