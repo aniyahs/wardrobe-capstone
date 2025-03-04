@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "204328910227",
+    "project_id": "wardrobe-creator-8da92",
+    "storage_bucket": "wardrobe-creator-8da92.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:204328910227:android:f67c37bba66d3392573c66",
+        "android_client_info": {
+          "package_name": "com.frontend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkXZG9i3fqSMU8NrbLpP49HlQmEiRGIfk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

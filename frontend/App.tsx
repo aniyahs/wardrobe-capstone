@@ -9,6 +9,7 @@ import PhotoUpload from './src/pages/PhotoUpload';
 import Profile from './src/pages/Profile';
 import Weather from './src/components/Weather';
 import { globalStyles } from './src/styles/styles';
+import app from '@react-native-firebase/app';
 
 const App: React.FC = () => {
   const [screen, setScreen] = useState('Landing'); // Default screen is Landing
@@ -30,33 +31,33 @@ const App: React.FC = () => {
         return <Signup setScreen={setScreen} />;
       case 'Gallery':
         return <Gallery />;
-      case 'Upload':
-        return <PhotoUpload />;
-      case 'Profile':
-        return <Profile />;
-      case 'Landing':
-        return <LandingPage setScreen={setScreen} />;
-      case 'Home':
-        return (
-          <View style={globalStyles.container}>
-            <Text style={globalStyles.title}>Welcome to the Home Screen</Text>
-            <Weather />
-          </View>
-        );
-      default:
-        return (
-          <View style={globalStyles.container}>
-            <Text style={globalStyles.title}>Welcome to the App</Text>
-            <Weather />
-          </View>
-        );
+        case 'Upload':
+          return <PhotoUpload />;
+          case 'Profile':
+            return <Profile />;
+          case 'Landing':
+            return <LandingPage setScreen={setScreen} />;
+            case 'Home':
+              return (
+                <View style={globalStyles.container}>
+                  <Text style={globalStyles.title}>Welcome to the Home Screen</Text>
+                  <Weather />
+                </View>
+            );
+        default:
+          return (
+            <View style={globalStyles.container}>
+              <Text style={globalStyles.title}>Welcome to the App</Text>
+              <Weather />
+            </View>
+          );
     }
   };
 
   return (
     <View style={globalStyles.container}>
       {renderScreen()}
-      {isLoggedIn && <Navbar setScreen={setScreen} />} {/* Show Navbar only if logged in */}
+      {isLoggedIn && <Navbar setScreen={setScreen} />} {/* Show Navbar only if logged in; Line causes text error*/}
     </View>
   );
 };
