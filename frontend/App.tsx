@@ -6,6 +6,7 @@ import Login from './src/pages/Login';
 import Signup from './src/pages/Signup';
 import Gallery from './src/pages/Gallery';
 import PhotoUpload from './src/pages/PhotoUpload';
+import Outfit from './src/pages/OutfitSelector';
 import Profile from './src/pages/Profile';
 import Weather from './src/components/Weather';
 import { globalStyles } from './src/styles/styles';
@@ -34,6 +35,8 @@ const App: React.FC = () => {
         return <PhotoUpload />;
       case 'Profile':
         return <Profile />;
+      case 'Outfit':
+        return <Outfit />;
       case 'Landing':
         return <LandingPage setScreen={setScreen} />;
       case 'Home':
@@ -56,7 +59,7 @@ const App: React.FC = () => {
   return (
     <View style={globalStyles.container}>
       {renderScreen()}
-      {isLoggedIn && <Navbar setScreen={setScreen} />} {/* Show Navbar only if logged in */}
+      {isLoggedIn && <Navbar setScreen={setScreen} />} {/* Tes */}
     </View>
   );
 };

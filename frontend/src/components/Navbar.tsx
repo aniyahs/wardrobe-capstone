@@ -30,6 +30,9 @@ const Navbar: React.FC<NavbarProps> = ({ setScreen }) => {
       <Pressable onPress={() => setScreen("Profile")} style={globalStyles.navButton}>
         <Text style={globalStyles.navText}>Profile</Text>
       </Pressable>
+      <Pressable onPress={() => setScreen("Outfit")} style={globalStyles.navButton}>
+        <Text style={globalStyles.navText}>Outfit</Text>
+      </Pressable>
     </View>
   );
 };

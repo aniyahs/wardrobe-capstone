@@ -4,7 +4,7 @@ from itertools import product
 import random
 
 # -------------------------
-# Helper Functions
+# Helper Functions (same as before)
 # -------------------------
 
 def hexToHSV(clothes):
@@ -73,7 +73,6 @@ def avoid_monochrome(outfit):
     return len(colors) > 1 or "black" in colors
 
 def check_layers(outfit):
-    # Count items worn on top from either tops or outerwear.
     top_items = [item for item in outfit if item['type'] in clothingTypes['tops'] or item['type'] in clothingTypes['outerwear']]
     return len(top_items) <= 3
 
@@ -108,19 +107,17 @@ def best_match_color(outfit):
                 return True
     return False
 
-# New helper to ensure items are not duplicated.
+# Uniqueness helper.
 def all_unique(*args):
     non_none = [x for x in args if x is not None]
     return len(non_none) == len(set(id(x) for x in non_none))
 
 # -------------------------
-# Constraint Programming Outfit Generator with "Closest Match" fallback
+# Updated Generator with Pruning in Fallback Search
 # -------------------------
 
 def generate_outfit_cps(season, formality, wardrobeItems):
-    problem = Problem()
-
-    # Build candidate lists based on type and season.
+    # Build candidate lists.
     tops_candidates = [item for item in wardrobeItems 
                        if item['type'] in clothingTypes['tops'] and get_seasons_match(item, season)]
     bottoms_candidates = [item for item in wardrobeItems 
@@ -129,12 +126,10 @@ def generate_outfit_cps(season, formality, wardrobeItems):
                            if item['type'] in clothingTypes['footwear'] and get_seasons_match(item, season)]
     accessories_candidates = [item for item in wardrobeItems 
                               if item['type'] in clothingTypes['accessories']]
-    # Layering candidates come from tops and outerwear.
     layering_candidates = [item for item in wardrobeItems 
-                           if (item['type'] in clothingTypes['tops'] or item['type'] in clothingTypes['outerwear']) 
+                           if (item['type'] in clothingTypes['tops'] or item['type'] in clothingTypes['outerwear'])
                            and get_seasons_match(item, season)]
     
-    # Optional candidates for layers and accessory.
     layer1_candidates = [None] + layering_candidates
     layer2_candidates = [None] + layering_candidates
     accessory_candidates = [None] + accessories_candidates
@@ -146,7 +141,7 @@ def generate_outfit_cps(season, formality, wardrobeItems):
     print("Footwear candidates:", footwear_candidates)
     print("Accessories candidates:", accessory_candidates)
 
-    # Check for empty mandatory domains.
+    # Check mandatory domains.
     if not tops_candidates:
         raise ValueError("No valid tops available for the given season.")
     if not bottoms_candidates:
@@ -154,142 +149,117 @@ def generate_outfit_cps(season, formality, wardrobeItems):
     if not footwear_candidates:
         raise ValueError("No valid footwear available for the given season.")
 
-    # Add variables.
-    problem.addVariable('top', tops_candidates)
-    problem.addVariable('layer1', layer1_candidates)
-    problem.addVariable('layer2', layer2_candidates)
-    problem.addVariable('bottom', bottoms_candidates)
-    problem.addVariable('footwear', footwear_candidates)
-    problem.addVariable('accessory', accessory_candidates)
-
-    # Constraint: Ensure each selected item is unique (if not None).
-    problem.addConstraint(all_unique, ['top', 'layer1', 'layer2', 'bottom', 'footwear', 'accessory'])
-
-    # Helper to build the complete outfit.
-    def outfit_from_solution(sol):
+    # Variables and candidate dictionary.
+    variables = ['top', 'layer1', 'layer2', 'bottom', 'footwear', 'accessory']
+    candidates = {
+        'top': tops_candidates,
+        'layer1': layer1_candidates,
+        'layer2': layer2_candidates,
+        'bottom': bottoms_candidates,
+        'footwear': footwear_candidates,
+        'accessory': accessory_candidates
+    }
+    
+    # Helper to build a complete outfit from an assignment.
+    def outfit_from_assignment(assignment):
         outfit = []
-        outfit.append(sol['top'])  # Mandatory top.
-        if sol['layer1'] is not None:
-            outfit.append(sol['layer1'])
-        if sol['layer2'] is not None:
-            outfit.append(sol['layer2'])
-        outfit.append(sol['bottom'])  # Mandatory bottom.
-        outfit.append(sol['footwear'])  # Mandatory footwear.
-        if sol['accessory'] is not None:
-            outfit.append(sol['accessory'])
+        outfit.append(assignment['top'])  # Mandatory top.
+        if assignment['layer1'] is not None:
+            outfit.append(assignment['layer1'])
+        if assignment['layer2'] is not None:
+            outfit.append(assignment['layer2'])
+        outfit.append(assignment['bottom'])  # Mandatory bottom.
+        outfit.append(assignment['footwear'])  # Mandatory footwear.
+        if assignment['accessory'] is not None:
+            outfit.append(assignment['accessory'])
         return outfit
 
-    # Add constraints by wrapping existing validation functions.
-    def constraint_max_three_colors(top, layer1, layer2, bottom, footwear, accessory):
-        return max_three_colors(outfit_from_solution({
-            'top': top, 'layer1': layer1, 'layer2': layer2,
-            'bottom': bottom, 'footwear': footwear, 'accessory': accessory}))
-    problem.addConstraint(constraint_max_three_colors, 
-                          ['top', 'layer1', 'layer2', 'bottom', 'footwear', 'accessory'])
+    # Penalty function for a complete assignment.
+    def calculate_penalty(assignment):
+        outfit = outfit_from_assignment(assignment)
+        penalty = 0
+        if not all_unique(assignment['top'], assignment['layer1'], assignment['layer2'], assignment['bottom'], assignment['footwear'], assignment['accessory']):
+            penalty += 10
+        if not max_three_colors(outfit): penalty += 1
+        if not avoid_monochrome(outfit): penalty += 1
+        if not check_formality(outfit): penalty += 1
+        if not check_layers(outfit): penalty += 1
+        if not no_socks_with_sandals_or_heels(outfit): penalty += 1
+        if not heels_require_skirt(outfit): penalty += 1
+        if not avoid_complementary_colors(outfit): penalty += 1
+        if not best_match_color(outfit): penalty += 1
+        return penalty
 
-    def constraint_avoid_monochrome(top, layer1, layer2, bottom, footwear, accessory):
-        return avoid_monochrome(outfit_from_solution({
-            'top': top, 'layer1': layer1, 'layer2': layer2,
-            'bottom': bottom, 'footwear': footwear, 'accessory': accessory}))
-    problem.addConstraint(constraint_avoid_monochrome, 
-                          ['top', 'layer1', 'layer2', 'bottom', 'footwear', 'accessory'])
+    # Partial penalty lower-bound. Only consider constraints we can check on partial assignments.
+    def partial_penalty(assignment):
+        # assignment is a dict that might not have all variables assigned.
+        penalty = 0
+        assigned = [assignment.get(var) for var in variables if var in assignment]
+        # Uniqueness:
+        non_none = [x for x in assigned if x is not None]
+        if len(non_none) != len(set(id(x) for x in non_none)):
+            penalty += 10
+        # Formality: if more than one assigned and formality mismatches.
+        formalities = [x['formality'] for x in non_none if 'formality' in x]
+        if formalities and len(set(formalities)) > 1:
+            penalty += 1
+        # Colors: if assigned items already exceed three distinct colors.
+        colors = {x['color'] for x in non_none}
+        if len(colors) > 3:
+            penalty += 1
+        # No socks with sandals/heels.
+        types = {x['type'] for x in non_none}
+        if 'Socks' in types and (('Sandals' in types) or ('Heels' in types)):
+            penalty += 1
+        # Heels require skirt: if bottom is assigned and there is a heel.
+        if 'bottom' in assignment and assignment['bottom'] is not None:
+            if any(x is not None and x['type'] == 'Heels' for key, x in assignment.items() if key in ['top','layer1','layer2']):
+                if assignment['bottom']['type'] != 'Skirt':
+                    penalty += 1
+        return penalty
 
-    def constraint_formality(top, layer1, layer2, bottom, footwear, accessory):
-        return check_formality(outfit_from_solution({
-            'top': top, 'layer1': layer1, 'layer2': layer2,
-            'bottom': bottom, 'footwear': footwear, 'accessory': accessory}))
-    problem.addConstraint(constraint_formality, 
-                          ['top', 'layer1', 'layer2', 'bottom', 'footwear', 'accessory'])
+    # Global variables to store the best complete solution.
+    best_solution = None
+    best_penalty = float('inf')
 
-    def constraint_layers(top, layer1, layer2, bottom, footwear, accessory):
-        return check_layers(outfit_from_solution({
-            'top': top, 'layer1': layer1, 'layer2': layer2,
-            'bottom': bottom, 'footwear': footwear, 'accessory': accessory}))
-    problem.addConstraint(constraint_layers, 
-                          ['top', 'layer1', 'layer2', 'bottom', 'footwear', 'accessory'])
+    # Recursive backtracking with pruning.
+    def backtrack(index, current_assignment):
+        nonlocal best_solution, best_penalty
+        if index == len(variables):
+            # Complete assignment.
+            pen = calculate_penalty(current_assignment)
+            if pen < best_penalty:
+                best_penalty = pen
+                best_solution = current_assignment.copy()
+            return
 
-    def constraint_no_socks(top, layer1, layer2, bottom, footwear, accessory):
-        return no_socks_with_sandals_or_heels(outfit_from_solution({
-            'top': top, 'layer1': layer1, 'layer2': layer2,
-            'bottom': bottom, 'footwear': footwear, 'accessory': accessory}))
-    problem.addConstraint(constraint_no_socks, 
-                          ['top', 'layer1', 'layer2', 'bottom', 'footwear', 'accessory'])
+        var = variables[index]
+        for candidate in candidates[var]:
+            current_assignment[var] = candidate
+            # Compute partial penalty lower bound.
+            part_pen = partial_penalty(current_assignment)
+            # If this partial penalty already exceeds our best known, prune this branch.
+            if part_pen > best_penalty:
+                continue
+            backtrack(index + 1, current_assignment)
+            # Remove assignment for var for backtracking.
+            del current_assignment[var]
 
-    def constraint_heels_require_skirt(top, layer1, layer2, bottom, footwear, accessory):
-        return heels_require_skirt(outfit_from_solution({
-            'top': top, 'layer1': layer1, 'layer2': layer2,
-            'bottom': bottom, 'footwear': footwear, 'accessory': accessory}))
-    problem.addConstraint(constraint_heels_require_skirt, 
-                          ['top', 'layer1', 'layer2', 'bottom', 'footwear', 'accessory'])
+    # Run the backtracking search.
+    backtrack(0, {})
 
-    def constraint_avoid_complementary(top, layer1, layer2, bottom, footwear, accessory):
-        return avoid_complementary_colors(outfit_from_solution({
-            'top': top, 'layer1': layer1, 'layer2': layer2,
-            'bottom': bottom, 'footwear': footwear, 'accessory': accessory}))
-    problem.addConstraint(constraint_avoid_complementary, 
-                          ['top', 'layer1', 'layer2', 'bottom', 'footwear', 'accessory'])
-
-    def constraint_best_match_color(top, layer1, layer2, bottom, footwear, accessory):
-        return best_match_color(outfit_from_solution({
-            'top': top, 'layer1': layer1, 'layer2': layer2,
-            'bottom': bottom, 'footwear': footwear, 'accessory': accessory}))
-    problem.addConstraint(constraint_best_match_color, 
-                          ['top', 'layer1', 'layer2', 'bottom', 'footwear', 'accessory'])
-
-    # First try: get perfect solutions.
-    solutions = problem.getSolutions()
-    if solutions:
-        sol = solutions[0]
-        outfit = outfit_from_solution(sol)
-        print("Outfit found using CPS!")
+    if best_solution is not None:
+        outfit = outfit_from_assignment(best_solution)
+        print(f"Closest outfit found with penalty {best_penalty}")
         return outfit
     else:
-        # No perfect solution found; iterate over all possible combinations to find the "closest match".
-        def calculate_penalty(sol):
-            outfit = outfit_from_solution(sol)
-            penalty = 0
-            # Strong penalty for duplicate items.
-            if not all_unique(sol['top'], sol['layer1'], sol['layer2'], sol['bottom'], sol['footwear'], sol['accessory']):
-                penalty += 10
-            if not max_three_colors(outfit): penalty += 1
-            if not avoid_monochrome(outfit): penalty += 1
-            if not check_formality(outfit): penalty += 1
-            if not check_layers(outfit): penalty += 1
-            if not no_socks_with_sandals_or_heels(outfit): penalty += 1
-            if not heels_require_skirt(outfit): penalty += 1
-            if not avoid_complementary_colors(outfit): penalty += 1
-            if not best_match_color(outfit): penalty += 1
-            return penalty
-
-        best_penalty = None
-        best_sol = None
-        for combo in product(tops_candidates, layer1_candidates, layer2_candidates, bottoms_candidates, footwear_candidates, accessory_candidates):
-            sol_dict = {
-                'top': combo[0],
-                'layer1': combo[1],
-                'layer2': combo[2],
-                'bottom': combo[3],
-                'footwear': combo[4],
-                'accessory': combo[5]
-            }
-            pen = calculate_penalty(sol_dict)
-            if best_penalty is None or pen < best_penalty:
-                best_penalty = pen
-                best_sol = sol_dict
-                if pen == 0:
-                    break  # Perfect match found.
-        if best_sol is not None:
-            outfit = outfit_from_solution(best_sol)
-            print(f"Closest outfit found with penalty {best_penalty}")
-            return outfit
-        else:
-            print("No outfit found even for closest match.")
-            return None
+        print("No outfit found even for closest match.")
+        return None
 
 # -------------------------
 # Example Usage
 # -------------------------
-season = ['Spring']       # Adjust to a season that matches your wardrobe items.
+season = ['Spring']       # Adjust as needed.
 formality = 'Casual'      # Ensure this matches items in your wardrobe.
 try:
     outfit = generate_outfit_cps(season, formality, wardrobeItems)
