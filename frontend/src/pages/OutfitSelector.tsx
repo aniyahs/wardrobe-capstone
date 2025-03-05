@@ -27,7 +27,6 @@ function getContrastColor(hexColor: string): string {
 
 // 3) Render a single square if the item is valid (has a non-empty type).
 const renderSquare = (item?: WardrobeItem) => {
-  // Skip rendering if the item is missing or has no valid 'type'
   if (!item || !item.type || !item.type.trim()) {
     return null;
   }
@@ -45,12 +44,10 @@ const renderSquare = (item?: WardrobeItem) => {
 // 4) Render a row of squares from an array of items
 //    This allows multiple items in a single row (like top, layer1, layer2).
 const renderRow = (items: (WardrobeItem | undefined)[]) => {
-  // Filter out invalid items (no type, empty type)
   const validItems = items.filter(
     (item) => item && item.type && item.type.trim()
   );
 
-  // If there are no valid items, don't render a row at all
   if (validItems.length === 0) return null;
 
   return (
@@ -148,7 +145,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#fff',
+    //backgroundColor: '#fff',
   },
   header: {
     fontSize: 24,

@@ -59,7 +59,7 @@ const App: React.FC = () => {
   return (
     <View style={globalStyles.container}>
       {renderScreen()}
-      {isLoggedIn && <Navbar setScreen={setScreen} />} {/* Tes */}
+      {isLoggedIn && <Navbar setScreen={setScreen} />} 
     </View>
   );
 };
