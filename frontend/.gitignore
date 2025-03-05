@@ -34,6 +34,9 @@ local.properties
 *.keystore
 !debug.keystore
 
+# Ignore Google Services JSON (Firebase config file)
+android/app/google-services.json
+
 # node.js
 #
 node_modules/

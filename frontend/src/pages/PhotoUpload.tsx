@@ -1,31 +1,38 @@
 import React, { useState } from "react";
-import { View, Text, Image, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import { launchImageLibrary } from "react-native-image-picker";  // Import the image picker
+import { View, Text, Image, TouchableOpacity, Alert } from "react-native";
+import { launchImageLibrary } from "react-native-image-picker";
 import { globalStyles } from "../styles/styles";
+import { uploadImageToStorage } from "../components/Firebase";
 
 const PhotoUpload = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  // Function to handle image selection
   const handleSelectPhoto = () => {
+
     launchImageLibrary(
       {
-        mediaType: 'photo',  // Specify that we want photos only (no videos)
-        quality: 0.5,  // Set the image quality (optional)
-        includeBase64: false,  // Set whether we want base64 encoding (optional)
+        mediaType: 'photo',
+        quality: 0.5,
+        includeBase64: false,
       },
-      (response) => {
+      async (response) => {
         if (response.didCancel) {
           console.log('User cancelled image picker');
         } else if (response.errorCode) {
           Alert.alert('Error', 'Image picker error: ' + response.errorMessage);
-        } else {
-          // Set the selected image URI to state
-          if (response.assets && response.assets[0].uri) {
-            setSelectedImage(response.assets[0].uri);
-          } else {
-            Alert.alert('Error', 'No image selected');
+        } else if (response.assets && response.assets[0]?.uri) {
+          const imageUri = response.assets[0].uri;
+          setSelectedImage(imageUri);
+
+          try {
+            const downloadUrl = await uploadImageToStorage(imageUri);
+            console.log('✅ Upload complete. Download URL:', downloadUrl);
+            Alert.alert('Success', 'Image uploaded!');
+          } catch (err) {
+            Alert.alert('Upload Failed', 'Could not upload image.');
           }
+        } else {
+          Alert.alert('Error', 'No image selected');
         }
       }
     );
@@ -35,6 +42,7 @@ const PhotoUpload = () => {
     <View style={globalStyles.container}>
       <Text style={globalStyles.title}>Upload a Photo</Text>
 
+      {/* The button to actually open the image picker */}
       <TouchableOpacity onPress={handleSelectPhoto} style={globalStyles.uploadButton}>
         <Text style={globalStyles.uploadButtonText}>Select Photo</Text>
       </TouchableOpacity>

@@ -20,7 +20,7 @@ def add_item():
         "size": data["size"],
         "season": data["season"],
         "image_url": data["image_url"],
-        "tags": data.get("tags", [])  
+        "tags": data.get("tags", []) 
     }
     
     result = wardrobe_collection.insert_one(item)

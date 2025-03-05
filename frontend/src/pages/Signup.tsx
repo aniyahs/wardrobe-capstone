@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { globalStyles } from "../styles/styles";
 
-const Signup = ({ navigation }: any) => {
+const Signup = ({ setScreen }: { setScreen: (screen: string) => void }) => {
   const [name, setName] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -19,7 +19,7 @@ const Signup = ({ navigation }: any) => {
     setPassword("");
 
     // Redirect to Login screen after successful signup
-    setTimeout(() => navigation.navigate("Login"), 1500);
+    setTimeout(() => setScreen("Login"), 1500);  
   };
 
   return (
@@ -46,7 +46,7 @@ const Signup = ({ navigation }: any) => {
         <Text style={globalStyles.buttonText}>Sign Up</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+      <TouchableOpacity onPress={() => setScreen("Login")}>
         <Text style={globalStyles.link}>Already have an account? Login</Text>
       </TouchableOpacity>
     </View>
@@ -54,4 +54,3 @@ const Signup = ({ navigation }: any) => {
 };
 
 export default Signup;
-
