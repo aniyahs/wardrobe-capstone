@@ -112,7 +112,7 @@ wardrobeItems = [
         "_id": "13",
         "type": "Sneakers",
         "color": "#808080",  # Gray
-        "season": ["All-Season"],
+        "season": ["Summer", "Fall", "Winter", "Spring"],
         "size": "M",
         "formality": "Casual"
     },
@@ -120,7 +120,7 @@ wardrobeItems = [
         "_id": "14",
         "type": "Dress Shoes",
         "color": "#2F4F4F",  # Dark Slate Gray
-        "season": ["All-Season"],
+        "season": ["Summer", "Fall", "Winter", "Spring"],
         "size": "M",
         "formality": "Formal"
     },
@@ -130,7 +130,7 @@ wardrobeItems = [
         "_id": "15",
         "type": "Belt",
         "color": "#8B0000",  # Dark Red
-        "season": ["All-Season"],
+        "season": ["Summer", "Fall", "Winter", "Spring"],
         "size": "M",
         "formality": "Business Casual"
     },
@@ -196,21 +196,21 @@ wardrobeItems = [
     {"_id": "50", "type": "Shorts", "color": "#4682B4", "season": ["Summer", "Spring"], "size": "M", "formality": "Casual"},
 
     # **Shoes (Footwear)**
-    {"_id": "51", "type": "Sneakers", "color": "#00008B", "season": ["All-Season"], "size": "M", "formality": "Casual"},
-    {"_id": "52", "type": "Sneakers", "color": "#FF7F50", "season": ["All-Season"], "size": "M", "formality": "Casual"},
-    {"_id": "53", "type": "Sneakers", "color": "#32CD32", "season": ["All-Season"], "size": "M", "formality": "Casual"},
+    {"_id": "51", "type": "Sneakers", "color": "#00008B", "season": ["Summer", "Fall", "Winter", "Spring"], "size": "M", "formality": "Casual"},
+    {"_id": "52", "type": "Sneakers", "color": "#FF7F50", "season": ["Summer", "Fall", "Winter", "Spring"], "size": "M", "formality": "Casual"},
+    {"_id": "53", "type": "Sneakers", "color": "#32CD32", "season": ["Summer", "Fall", "Winter", "Spring"], "size": "M", "formality": "Casual"},
     {"_id": "54", "type": "Sneakers", "color": "#228B22", "season": ["Spring"], "size": "M", "formality": "Casual"},
     {"_id": "55", "type": "Dress Shoes", "color": "#8B4513", "season": ["Summer"], "size": "M", "formality": "Formal"},
-    {"_id": "56", "type": "Dress Shoes", "color": "#2F4F4F", "season": ["All-Season"], "size": "M", "formality": "Formal"},
-    {"_id": "57", "type": "Dress Shoes", "color": "#708090", "season": ["All-Season"], "size": "M", "formality": "Formal"},
+    {"_id": "56", "type": "Dress Shoes", "color": "#2F4F4F", "season": ["Summer", "Fall", "Winter", "Spring"], "size": "M", "formality": "Formal"},
+    {"_id": "57", "type": "Dress Shoes", "color": "#708090", "season": ["Summer", "Fall", "Winter", "Spring"], "size": "M", "formality": "Formal"},
 
     # **Accessories**
-    {"_id": "58", "type": "Belt", "color": "#FFD700", "season": ["All-Season"], "size": "M", "formality": "Business Casual"},
-    {"_id": "59", "type": "Belt", "color": "#B22222", "season": ["All-Season"], "size": "M", "formality": "Business Casual"},
+    {"_id": "58", "type": "Belt", "color": "#FFD700", "season": ["Summer", "Fall", "Winter", "Spring"], "size": "M", "formality": "Business Casual"},
+    {"_id": "59", "type": "Belt", "color": "#B22222", "season": ["Summer", "Fall", "Winter", "Spring"], "size": "M", "formality": "Business Casual"},
     {"_id": "60", "type": "Hat", "color": "#A52A2A", "season": ["Summer", "Spring"], "size": "M", "formality": "Casual"},
     {"_id": "61", "type": "Hat", "color": "#FFFF00", "season": ["Summer", "Spring"], "size": "M", "formality": "Casual"},
     {"_id": "62", "type": "Hat", "color": "#808080", "season": ["Spring", "Summer"], "size": "M", "formality": "Casual"},
-    {"_id": "63", "type": "Belt", "color": "#8B0000", "season": ["All-Season"], "size": "M", "formality": "Business Casual"},
+    {"_id": "63", "type": "Belt", "color": "#8B0000", "season": ["Summer", "Fall", "Winter", "Spring"], "size": "M", "formality": "Business Casual"},
     {"_id": "64", "type": "Hat", "color": "#F5F5F5", "season": ["Summer", "Spring"], "size": "M", "formality": "Casual"},
 
 ]

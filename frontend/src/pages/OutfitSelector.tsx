@@ -1,15 +1,66 @@
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet, ActivityIndicator } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import axios from 'axios';
+
+// 1) Define the interface for outfit items
+interface WardrobeItem {
+  type: string;
+  color: string;
+}
 
 interface Outfit {
-  top: { color: string };
-  layer1?: { color: string } | null;
-  layer2?: { color: string } | null;
-  bottom: { color: string };
-  footwear: { color: string };
-  accessory?: { color: string } | null;
+  top?: WardrobeItem;
+  layer1?: WardrobeItem;
+  layer2?: WardrobeItem;
+  bottom?: WardrobeItem;
+  footwear?: WardrobeItem;
+  accessory?: WardrobeItem;
 }
+
+// 2) Helper: if the color is darker than #505050, use white text
+function getContrastColor(hexColor: string): string {
+  const cleaned = hexColor.replace('#', '');
+  const numericColor = parseInt(cleaned, 16);
+  return numericColor <= 0x505050 ? '#FFFFFF' : '#000000';
+}
+
+// 3) Render a single square if the item is valid (has a non-empty type).
+const renderSquare = (item?: WardrobeItem) => {
+  // Skip rendering if the item is missing or has no valid 'type'
+  if (!item || !item.type || !item.type.trim()) {
+    return null;
+  }
+
+  const contrastColor = getContrastColor(item.color);
+  return (
+    <View style={[styles.square, { backgroundColor: item.color }]}>
+      <Text style={[styles.squareText, { color: contrastColor }]}>
+        {item.type}
+      </Text>
+    </View>
+  );
+};
+
+// 4) Render a row of squares from an array of items
+//    This allows multiple items in a single row (like top, layer1, layer2).
+const renderRow = (items: (WardrobeItem | undefined)[]) => {
+  // Filter out invalid items (no type, empty type)
+  const validItems = items.filter(
+    (item) => item && item.type && item.type.trim()
+  );
+
+  // If there are no valid items, don't render a row at all
+  if (validItems.length === 0) return null;
+
+  return (
+    <View style={styles.row}>
+      {validItems.map((item, index) => (
+        <View key={index}>{renderSquare(item)}</View>
+      ))}
+    </View>
+  );
+};
 
 const OutfitGeneratorScreen = () => {
   const [season, setSeason] = useState('Summer');
@@ -17,34 +68,32 @@ const OutfitGeneratorScreen = () => {
   const [outfit, setOutfit] = useState<Outfit | null>(null);
   const [loading, setLoading] = useState(false);
 
+  // 5) Fetch the outfit from the backend
   const generateOutfit = () => {
     setLoading(true);
-
-    // Simulated "API response" with test colors
-    setTimeout(() => {
-      setOutfit({
-        top: { color: '#FF6347' }, // Tomato
-        layer1: { color: '#FFD700' }, // Gold
-        layer2: null, // No second layer
-        bottom: { color: '#4682B4' }, // Steel Blue
-        footwear: { color: '#8B4513' }, // Saddle Brown
-        accessory: { color: '#32CD32' } // Lime Green
+    axios
+      .post('http://127.0.0.1:5000/generate-outfit', { season, formality })
+      .then((response) => {
+        setOutfit(response.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error generating outfit:', error);
+        setLoading(false);
       });
-
-      setLoading(false);
-    }, 1000); // Simulated delay
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.header}>Outfit Generator</Text>
 
+      {/* Season Picker */}
       <View style={styles.pickerContainer}>
         <Text style={styles.label}>Season:</Text>
         <Picker
           selectedValue={season}
           style={styles.picker}
-          onValueChange={value => setSeason(value)}
+          onValueChange={(value) => setSeason(value)}
         >
           <Picker.Item label="Summer" value="Summer" />
           <Picker.Item label="Spring" value="Spring" />
@@ -53,12 +102,13 @@ const OutfitGeneratorScreen = () => {
         </Picker>
       </View>
 
+      {/* Formality Picker */}
       <View style={styles.pickerContainer}>
         <Text style={styles.label}>Formality:</Text>
         <Picker
           selectedValue={formality}
           style={styles.picker}
-          onValueChange={value => setFormality(value)}
+          onValueChange={(value) => setFormality(value)}
         >
           <Picker.Item label="Casual" value="Casual" />
           <Picker.Item label="Business Casual" value="Business Casual" />
@@ -67,81 +117,67 @@ const OutfitGeneratorScreen = () => {
         </Picker>
       </View>
 
+      {/* Generate Button */}
       <Button title="Generate Outfit" onPress={generateOutfit} />
 
+      {/* Loader */}
       {loading && <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />}
 
+      {/* Outfit Display */}
       {outfit && (
         <View style={styles.outfitContainer}>
-          {/* First row: Top, Layer1, Layer2 */}
-          <View style={styles.row}>
-            <View style={[styles.square, { backgroundColor: outfit.top.color }]}>
-              <Text style={styles.squareText}>Top</Text>
-            </View>
-            <View style={[styles.square, { backgroundColor: outfit.layer1 ? outfit.layer1.color : '#fff' }]}>
-              <Text style={styles.squareText}>Layer1</Text>
-            </View>
-            <View style={[styles.square, { backgroundColor: outfit.layer2 ? outfit.layer2.color : '#fff' }]}>
-              <Text style={styles.squareText}>Layer2</Text>
-            </View>
-          </View>
-          {/* Second row: Bottom */}
-          <View style={styles.row}>
-            <View style={[styles.square, { backgroundColor: outfit.bottom.color }]}>
-              <Text style={styles.squareText}>Bottom</Text>
-            </View>
-          </View>
-          {/* Third row: Footwear */}
-          <View style={styles.row}>
-            <View style={[styles.square, { backgroundColor: outfit.footwear.color }]}>
-              <Text style={styles.squareText}>Footwear</Text>
-            </View>
-          </View>
-          {/* Fourth row: Accessory */}
-          <View style={styles.row}>
-            <View style={[styles.square, { backgroundColor: outfit.accessory ? outfit.accessory.color : '#fff' }]}>
-              <Text style={styles.squareText}>Accessory</Text>
-            </View>
-          </View>
+          {/* Row 1: Top, Layer1, Layer2 */}
+          {renderRow([outfit.top, outfit.layer1, outfit.layer2])}
+
+          {/* Row 2: Bottom */}
+          {renderRow([outfit.bottom])}
+
+          {/* Row 3: Footwear */}
+          {renderRow([outfit.footwear])}
+
+          {/* Row 4: Accessory */}
+          {renderRow([outfit.accessory])}
         </View>
       )}
     </View>
   );
 };
 
+// 6) Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 16,
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
     textAlign: 'center',
-    marginBottom: 24
+    marginBottom: 24,
   },
   pickerContainer: {
-    marginBottom: 16
+    marginBottom: 16,
   },
   label: {
     fontSize: 16,
-    marginBottom: 4
+    marginBottom: 4,
   },
   picker: {
     height: 50,
-    width: '100%'
+    width: '100%',
   },
   loader: {
-    marginVertical: 16
+    marginVertical: 16,
   },
   outfitContainer: {
-    marginTop: 32
+    marginTop: 32,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 16
+    alignItems: 'center',
+    marginBottom: 16,
   },
   square: {
     width: 100,
@@ -150,12 +186,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#000',
     justifyContent: 'center',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   squareText: {
-    color: '#000',
-    fontWeight: 'bold'
-  }
+    fontWeight: 'bold',
+  },
 });
 
 export default OutfitGeneratorScreen;
