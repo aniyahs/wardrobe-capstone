@@ -1,26 +1,63 @@
+from flask import Blueprint, request, jsonify
+from .outfitGenerator import generate_outfit_cps, clothingTypes, wardrobeItems
 
+# Create a blueprint for the outfit route
+outfit_bp = Blueprint('outfit_bp', __name__)
 
-# THIS STUFF DOES NOT WORK SAVING FOR LATER THO
+def map_outfit_to_slots(outfit_list):
+    # Initialize slots with default black if missing.
+    slots = {
+        "top": None,
+        "layer1": None,
+        "layer2": None,
+        "bottom": None,
+        "footwear": None,
+        "accessory": None
+    }
 
+    # Iterate through each clothing item in outfit_list
+    for item in outfit_list:
+        type_lower = item["type"]
 
-from flask import Flask, jsonify, request
-from ....frontend.src.components.outfitGenerator import generate_outfit_cps # Your outfit generation logic
-from ....frontend.src.components.sampleWardrobe import wardrobeItems
+        if type_lower in clothingTypes["tops"]:
+            if slots["top"] is None:
+                slots["top"] = item
+            elif slots["layer1"] is None:
+                slots["layer1"] = item
+            elif slots["layer2"] is None:
+                slots["layer2"] = item
 
-app = Flask(__name__)
+        elif type_lower in clothingTypes["bottoms"]:
+            slots["bottom"] = item
 
-@app.route('/generate-outfit', methods=['POST'])
+        elif type_lower in clothingTypes["footwear"]:
+            slots["footwear"] = item
+
+        elif type_lower in clothingTypes["accessories"]:
+            slots["accessory"] = item
+
+        elif type_lower in clothingTypes["outerwear"]:
+            if slots["layer1"] is None:
+                slots["layer1"] = item
+            elif slots["layer2"] is None:
+                slots["layer2"] = item
+
+    return slots
+
+# Route for generating outfit
+@outfit_bp.route('/generate-outfit', methods=['POST'])
 def generate_outfit():
-    # Get input from the request body (you can send season and formality in the POST request)
     data = request.get_json()
-    season = data.get('season', ['Spring'])
+    season = data.get('season', 'Spring')
     formality = data.get('formality', 'Casual')
-
+    # Ensure season is a list.
+    if isinstance(season, str):
+        season = [season]
     try:
-        outfit = generate_outfit_cps(season, formality, wardrobeItems)  # Call your algorithm
-        return jsonify(outfit), 200  # Return the outfit in JSON format
-    except ValueError as e:
-        return jsonify({'error': str(e)}), 400
-
-if __name__ == '__main__':
-    app.run(debug=True)
+        outfit_list = generate_outfit_cps(season, formality, wardrobeItems)
+        if outfit_list is None:
+            return jsonify({"error": "No valid outfit found"}), 400
+        slots = map_outfit_to_slots(outfit_list)
+        return jsonify(slots)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

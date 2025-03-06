@@ -1,4 +1,4 @@
-from sampleWardrobe import clothingTypes, wardrobeItems
+from .sampleWardrobe import clothingTypes, wardrobeItems
 from itertools import product
 import random
 

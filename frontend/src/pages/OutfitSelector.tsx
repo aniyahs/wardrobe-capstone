@@ -69,7 +69,7 @@ const OutfitGeneratorScreen = () => {
   const generateOutfit = () => {
     setLoading(true);
     axios
-      .post('http://127.0.0.1:5000/generate-outfit', { season, formality })
+      .post('http://10.0.2.2:5001/outfit/generate-outfit', { season, formality })
       .then((response) => {
         setOutfit(response.data);
         setLoading(false);
