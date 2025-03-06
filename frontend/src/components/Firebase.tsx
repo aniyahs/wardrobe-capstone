@@ -8,9 +8,11 @@ import {
     Platform,
     SafeAreaView,
     Text,
+    Alert,
 } from "react-native";
 import storage from '@react-native-firebase/storage';
 import { launchImageLibrary, MediaType, PhotoQuality, Asset } from 'react-native-image-picker';
+
 
 // Utility to extract filename from path
 const getFileNameFromPath = (path: string): string => {
@@ -32,6 +34,34 @@ export const uploadImageToStorage = async (path: string): Promise<string> => {
         throw new Error(`Upload failed: ${error.message}`);
     }
 };
+
+export const savePhotoUrlToMongo = async (userId: string, photoUrl: string): Promise<void> => {
+    try {
+        console.log('📡 Sending request to:', 'http://10.0.2.2:4000/api/photos');
+        console.log('📡 Request body:', JSON.stringify({ userId, photoUrl }));
+
+        const response = await fetch('http://10.0.2.2:4000/api/photos', {  
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, photoUrl }),
+        });
+
+        console.log('📡 Response status:', response.status);
+        
+        const data = await response.json();
+        console.log('✅ Server response:', data);
+
+        if (!response.ok) {
+            console.error('❌ Failed to save photo:', data.message);
+            Alert.alert('MongoDB Save Failed', data.message);
+        }
+    } catch (error) {
+        console.error('❌ Network error saving photo URL:', error);
+        Alert.alert('Network Error', 'Failed to reach backend.');
+    }
+};
+
+
 
 type State = {
     imagePath: string | null;
@@ -72,22 +102,15 @@ export default class Firebase extends React.Component<{}, State> {
                 }
 
                 const path = this.getPlatformPath(asset.uri);
-                this.setState({ imagePath: path }, () => this.uploadImage(path));
+                this.setState({ imagePath: path }, () => uploadImageToStorage(path));
             } else {
                 this.setState({ isLoading: false });
             }
         });
     };
 
-    uploadImage = async (path: string) => {
-        try {
-            const downloadURL = await uploadImageToStorage(path);
-            this.setState({ status: `✅ Upload successful! URL: ${downloadURL}`, isLoading: false });
-            console.log("Download URL:", downloadURL);
-        } catch (error: any) {
-            this.setState({ status: `❌ Upload failed: ${error.message}`, isLoading: false });
-        }
-    };
+    
+    
 
     getPlatformPath = (uri: string): string => {
         return Platform.OS === 'android' ? uri : uri.replace('file://', '');
