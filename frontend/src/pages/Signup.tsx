@@ -1,56 +1,65 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { globalStyles } from "../styles/styles";
+import { signupUser } from "../api/authService"; // Import signup API
 
 const Signup = ({ setScreen }: { setScreen: (screen: string) => void }) => {
-  const [name, setName] = useState("");
-  const [password, setPassword] = useState("");
-  const [message, setMessage] = useState("");
+    const [username, setUsername] = useState("");
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [message, setMessage] = useState("");
 
-  const handleSignup = () => {
-    if (!name || !password) {
-      setMessage("Please enter a name and password.");
-      return;
-    }
+    const handleSignup = async () => {
+        if (!username || !email || !password) {
+            setMessage("Please enter username, email, and password.");
+            return;
+        }
 
-    // Placeholder for actual signup logic (e.g., API call)
-    setMessage("Signup successful!");
-    setName("");
-    setPassword("");
+        try {
+            const response = await signupUser(username, email, password);
+            setMessage(response.message); // Show success message
+            setTimeout(() => setScreen("Login"), 1500); // Redirect to login
+        } catch (error) {
+            setMessage(error instanceof Error ? error.message : "Signup failed");
+        }
+    };
 
-    // Redirect to Login screen after successful signup
-    setTimeout(() => setScreen("Login"), 1500);  
-  };
+    return (
+        <View style={globalStyles.container}>
+            <Text style={globalStyles.title}>Sign Up</Text>
 
-  return (
-    <View style={globalStyles.container}>
-      <Text style={globalStyles.title}>Sign Up</Text>
+            <TextInput
+                style={globalStyles.input}
+                placeholder="Username"
+                value={username}
+                onChangeText={setUsername}
+            />
+            <TextInput
+                style={globalStyles.input}
+                placeholder="Email"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+            />
+            <TextInput
+                style={globalStyles.input}
+                placeholder="Password"
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+            />
 
-      <TextInput
-        style={globalStyles.input}
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={globalStyles.input}
-        placeholder="Password"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-      />
+            {message ? <Text style={globalStyles.message}>{message}</Text> : null}
 
-      {message ? <Text style={globalStyles.message}>{message}</Text> : null}
+            <TouchableOpacity style={globalStyles.button} onPress={handleSignup}>
+                <Text style={globalStyles.buttonText}>Sign Up</Text>
+            </TouchableOpacity>
 
-      <TouchableOpacity style={globalStyles.button} onPress={handleSignup}>
-        <Text style={globalStyles.buttonText}>Sign Up</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity onPress={() => setScreen("Login")}>
-        <Text style={globalStyles.link}>Already have an account? Login</Text>
-      </TouchableOpacity>
-    </View>
-  );
+            <TouchableOpacity onPress={() => setScreen("Login")}>
+                <Text style={globalStyles.link}>Already have an account? Login</Text>
+            </TouchableOpacity>
+        </View>
+    );
 };
 
 export default Signup;

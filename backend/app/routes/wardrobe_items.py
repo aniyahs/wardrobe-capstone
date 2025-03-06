@@ -2,13 +2,13 @@
 from flask import Blueprint, request, jsonify, session
 from app.database import wardrobe_collection
 from bson import ObjectId
-from auth import login_required
+#from auth import login_required
 
 wardrobe_bp = Blueprint("wardrobe", __name__)
 
 # Add a new wardrobe item 
 @wardrobe_bp.route("/add-item", methods=["POST"])
-@login_required
+#@login_required
 def add_item():
     data = request.json
     
@@ -28,7 +28,7 @@ def add_item():
 
 # Get a specific wardrobe item by ID
 @wardrobe_bp.route("/<item_id>", methods=["GET"])
-@login_required
+#@login_required
 def get_wardrobe_item(item_id):
     user_id = session.get("user_id")
     item = wardrobe_collection.find_one({"_id": ObjectId(item_id), "user_id": user_id})
@@ -41,7 +41,7 @@ def get_wardrobe_item(item_id):
 
 # Update a wardrobe item 
 @wardrobe_bp.route("/<item_id>", methods=["PUT"])
-@login_required
+#@login_required
 def update_wardrobe_item(item_id):
     user_id = session.get("user_id")
     data = request.json
@@ -60,7 +60,7 @@ def update_wardrobe_item(item_id):
 
 # Delete a wardrobe item 
 @wardrobe_bp.route("/<item_id>", methods=["DELETE"])
-@login_required
+#@login_required
 def delete_wardrobe_item(item_id):
     user_id = session.get("user_id")
     deleted_item = wardrobe_collection.find_one_and_delete(

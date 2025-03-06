@@ -5,8 +5,8 @@ from pymongo.errors import DuplicateKeyError
 from flask_cors import CORS
 from functools import wraps
 from bson import ObjectId
-from auth import login_required
-from app.routes.auth import login_required
+#from auth import login_required
+#from app.routes.auth import login_required
 
 
 # Create a Flask Blueprint for user routes
@@ -18,36 +18,55 @@ CORS(users_bp) # should allow frontend requests
 def register_user():
     data = request.json
 
+    # Validate input
+    if not data.get("username") or not data.get("email") or not data.get("password"):
+        return jsonify({"error": "Missing username, email, or password"}), 400
+
     # Check if email already exists
     existing_user = users_collection.find_one({"email": data["email"]})
     if existing_user:
         return jsonify({"error": "Email already registered"}), 400
 
+    # Check if username already exists
+    existing_username = users_collection.find_one({"username": data["username"]})
+    if existing_username:
+        return jsonify({"error": "Username already taken"}), 400
+
     # Hash the password before storing
     hashed_password = generate_password_hash(data["password"])
     
     user = {
-        "username": data["username"],
-        "name": data["name"],
-        "email": data["email"],
-        "password": hashed_password,
+        "username": data["username"],  # Use `username` instead of `name`
+        "email": data["email"],  # Store email
+        "password": hashed_password,  # Store hashed password
         "wardrobe": []  # Empty wardrobe initially
     }
     
     users_collection.insert_one(user)
-    return jsonify({"message": "User created successfully"}), 201
+    return jsonify({"message": "User created successfully!"}), 201
 
 # Endpoint to allow users to login with an existing account
 @users_bp.route("/login", methods=["POST"])
 def login_user():
     data = request.json
+
+    # Validate input
+    if not data.get("email") or not data.get("password"):
+        return jsonify({"error": "Missing email or password"}), 400
+
+    # Try to find the user by email
     user = users_collection.find_one({"email": data["email"]})
 
-    if user and check_password_hash(user["password"], data["password"]):
-        session["user_id"] = str(user["_id"])  # Store user session
-        return jsonify({"message": "Login successful", "user_id": session["user_id"]}), 200
-    else:
-        return jsonify({"error": "Invalid email or password"}), 401
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    # Check if the password is correct
+    if not check_password_hash(user["password"], data["password"]):
+        return jsonify({"error": "Invalid password"}), 401
+
+    # Return success and user details
+    return jsonify({"message": "Login successful", "user_id": str(user["_id"]), "username": user["username"]}), 200
+
     
 # Endpoint for logging out 
 @users_bp.route("/logout", methods=["POST"])
@@ -57,7 +76,7 @@ def logout_user():
 
 # Endpoint to fetch a users information (exclusing password for security)
 @users_bp.route("/profile", methods=["GET"])
-@login_required  # Middleware to ensure the user is authenticated
+#@login_required  # Middleware to ensure the user is authenticated
 def get_user_profile():
     user_id = session.get("user_id")  # Get the logged-in user's ID from the session
     
@@ -71,3 +90,13 @@ def get_user_profile():
     user["_id"] = str(user["_id"])
 
     return jsonify(user), 200  # Return the user's data
+
+# Endpoint to fetch all user emails
+@users_bp.route("/", methods=["GET"])
+def get_all_users():
+    try:
+        users = users_collection.find({}, {"email": 1, "_id": 0})  # Retrieve only emails
+        emails = [user["email"] for user in users]
+        return jsonify(emails), 200
+    except Exception as e:
+        return jsonify({"error": "Failed to fetch users", "details": str(e)}), 500

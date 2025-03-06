@@ -264,18 +264,3 @@ def generate_outfit_cps(season, formality, wardrobeItems):
         print("No outfit found even for closest match.")
         return None
 
-# -------------------------
-# Example Usage (commented out)
-# -------------------------
-# season = ['Spring']
-# formality = 'Casual'
-# try:
-#     outfit = generate_outfit_cps(season, formality, wardrobeItems)
-#     if outfit:
-#         print("Generated Outfit:")
-#         for item in outfit:
-#             print(f"Type: {item['type']}, Color: {item['color']}, Formality: {item['formality']}, Season: {item['season']}")
-#     else:
-#         print("No valid outfit found.")
-# except ValueError as e:
-#     print("Error:", e)

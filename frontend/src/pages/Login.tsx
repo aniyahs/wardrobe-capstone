@@ -5,7 +5,7 @@ import { loginUser } from "../api/authService"; // Import API function
 
 interface LoginProps {
   setScreen: (screen: string) => void;
-  handleLoginSuccess: () => void; // Callback function for login success
+  handleLoginSuccess: (username: string, userId: string) => void; // Pass user data on success
 }
 
 const Login: React.FC<LoginProps> = ({ setScreen, handleLoginSuccess }) => {
@@ -18,17 +18,10 @@ const Login: React.FC<LoginProps> = ({ setScreen, handleLoginSuccess }) => {
       return;
     }
 
-    // Simulate login if email and password are "a"
-    if (email === "a" && password === "a") {
-      handleLoginSuccess(); // Notify App.tsx that login was successful
-      return; // Simulate successful login and return
-    }
-
-    // Otherwise, call the actual login function
     try {
       const response = await loginUser(email, password);
       Alert.alert("Success", response.message); // Show success message
-      handleLoginSuccess(); // Notify App.tsx that login was successful
+      handleLoginSuccess(response.username, response.user_id); // Pass user data to App.tsx
     } catch (error) {
       Alert.alert("Error", (error as Error).message);
     }
