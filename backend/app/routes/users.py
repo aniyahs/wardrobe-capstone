@@ -91,12 +91,3 @@ def get_user_profile():
 
     return jsonify(user), 200  # Return the user's data
 
-# Endpoint to fetch all user emails
-@users_bp.route("/", methods=["GET"])
-def get_all_users():
-    try:
-        users = users_collection.find({}, {"email": 1, "_id": 0})  # Retrieve only emails
-        emails = [user["email"] for user in users]
-        return jsonify(emails), 200
-    except Exception as e:
-        return jsonify({"error": "Failed to fetch users", "details": str(e)}), 500
