@@ -1,4 +1,4 @@
-import React, { useState }, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, TouchableOpacity, Button, Alert } from "react-native";
 import { globalStyles } from "../styles/styles"; // Import shared styles
 import { loginUser } from "../api/authService"; // Import API function
