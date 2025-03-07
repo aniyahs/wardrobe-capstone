@@ -1,7 +1,9 @@
-import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
+import React, { useState }, { useEffect } from "react";
+import { View, Text, TextInput, TouchableOpacity, Button, Alert } from "react-native";
 import { globalStyles } from "../styles/styles"; // Import shared styles
 import { loginUser } from "../api/authService"; // Import API function
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import auth, { onIdTokenChanged } from '@react-native-firebase/auth';
 
 interface LoginProps {
   setScreen: (screen: string) => void;
@@ -11,6 +13,37 @@ interface LoginProps {
 const Login: React.FC<LoginProps> = ({ setScreen, handleLoginSuccess }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
+  useEffect(() => {
+    GoogleSignin.configure({
+      webClientId: '204328910227-u0oa5f5rk9ocd64ie97sp8f4bbb41c71.apps.googleusercontent.com', 
+    });
+    }, []);
+
+  async function onGoogleButtonPress() {
+      
+    await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      // create signInResult
+    const signInResult = await GoogleSignin.signIn();
+    
+      // Get users ID token
+    let idToken, user = signInResult.data!.idToken;
+
+    console.log(idToken);
+    Alert.alert("Success Login");
+      
+    if (!idToken) {
+      throw new Error('No ID token found');
+      }
+    
+    
+      // Create a Google credential with the token
+    const googleCredential = auth.GoogleAuthProvider.credential(signInResult.data!.idToken);
+    console.log(signInResult.data?.idToken)
+  
+    // Sign-in the user with the credential
+    return auth().signInWithCredential(googleCredential);
+  }
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -45,6 +78,9 @@ const Login: React.FC<LoginProps> = ({ setScreen, handleLoginSuccess }) => {
       />
       <TouchableOpacity style={globalStyles.button} onPress={handleLogin}>
         <Text style={globalStyles.buttonText}>Login</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={globalStyles.button} onPress={() => onGoogleButtonPress().then(() => console.log('Signed in with Google!'))}>
+        <Text style={globalStyles.buttonText}>Sign in with Google</Text>
       </TouchableOpacity>
     </View>
   );
