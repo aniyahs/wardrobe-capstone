@@ -1,6 +1,4 @@
-import { Dimensions, StyleSheet } from "react-native";
-
-const { width, height } = Dimensions.get("window");
+import { StyleSheet } from "react-native";
 
 export const globalStyles = StyleSheet.create({
   // General container styling
@@ -8,38 +6,24 @@ export const globalStyles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
-    position: "relative", // Allows absolute layers
+    backgroundColor: "#f5f5f5",
     paddingBottom: 60, // Space for navbar
   },
-  backgroundWrapper: {
-    ...StyleSheet.absoluteFillObject, // Covers entire screen
-    zIndex: -1, // Behind all content
-  },
-  gradientLayer: {
-    ...StyleSheet.absoluteFillObject,
-  },
-  radialGradientLayer: {
-    position: "absolute",
-    width: width,
-    height: height,
-    opacity: 0.48, // 38% Opacity
-  },
-  overlayLayer: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "#1f1f21",
-    opacity: 0.53, // 43% Opacity
-  },
+
+  // Titles
   title: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#EEE",
-    textShadowColor: "rgba(0, 0, 0, 0.7)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 5,
+    marginBottom: 20,
     textAlign: "center",
-    marginBottom: 5,
   },
-  
+
+  subtitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold",
@@ -129,7 +113,23 @@ export const globalStyles = StyleSheet.create({
     textDecorationLine: "underline",
     fontSize: 16,
     fontWeight: "bold",
-  }, 
+  },
+  navbar: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    backgroundColor: "#222",
+    padding: 15,
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
+  },
+  navButton: {
+    padding: 10,
+  },
+  navText: {
+    color: "#fff",
+    fontSize: 16,
+  },
   uploadButton: {
     backgroundColor: "#007bff",
     padding: 12,

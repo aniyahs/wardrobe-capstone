@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { globalStyles } from '../styles/styles';
 import axios from 'axios';
+import StyledText from "./StyledText";
 
 interface CurrentWeather {
   temperature: number;
@@ -47,12 +48,12 @@ const Weather: React.FC = () => {
 
   return (
     <View style={globalStyles.weatherContainer}>
-      <Text style={globalStyles.weatherText}>Current Weather in Cleveland:</Text>
+      <StyledText size={18} variant="subtitle">Current Weather in Cleveland:</StyledText>
       <View style={globalStyles.weatherRow}>
         <Text style={globalStyles.weatherEmoji}>{emoji}</Text>
         <View style={globalStyles.weatherInfo}>
-          <Text style={globalStyles.weatherText}>{description}</Text>
-          <Text style={globalStyles.weatherText}>{temperature}°F</Text>
+          <StyledText size={18} variant="subtitle">{description}</StyledText>
+          <StyledText size={18} variant="subtitle">{temperature}°F</StyledText>
         </View>
       </View>
     </View>

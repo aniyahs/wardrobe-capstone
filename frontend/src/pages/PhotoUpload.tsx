@@ -4,6 +4,8 @@ import { launchImageLibrary } from "react-native-image-picker";
 import { globalStyles } from "../styles/styles";
 import { uploadImageToStorage } from "../components/Firebase";
 import { savePhotoUrlToMongo } from "../components/Firebase"; 
+import GradientButton from "../components/GradientButton"
+
 
 const PhotoUpload = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -48,16 +50,9 @@ const handleSelectPhoto = () => {
 
   return (
     <View style={globalStyles.container}>
-      <Text style={globalStyles.title}>Upload a Photo</Text>
+      <GradientButton title="Upload a Photo" subtitle="Select from Camera Roll" onPress={handleSelectPhoto} />
 
-      {/* The button to actually open the image picker */}
-      <TouchableOpacity onPress={handleSelectPhoto} style={globalStyles.uploadButton}>
-        <Text style={globalStyles.uploadButtonText}>Select Photo</Text>
-      </TouchableOpacity>
-
-      {selectedImage && (
-        <Image source={{ uri: selectedImage }} style={globalStyles.imagePreview} />
-      )}
+      {selectedImage && <Image source={{ uri: selectedImage }} style={globalStyles.imagePreview} />}
     </View>
   );
 };

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { globalStyles } from "../styles/styles";
 import { signupUser } from "../api/authService"; // Import signup API
+import StyledText from "../components/StyledText";
 
 const Signup = ({ setScreen }: { setScreen: (screen: string) => void }) => {
     const [username, setUsername] = useState("");
@@ -26,7 +27,7 @@ const Signup = ({ setScreen }: { setScreen: (screen: string) => void }) => {
 
     return (
         <View style={globalStyles.container}>
-            <Text style={globalStyles.title}>Sign Up</Text>
+            <StyledText size={24} variant="title">Sign Up</StyledText>
 
             <TextInput
                 style={globalStyles.input}

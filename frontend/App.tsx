@@ -1,59 +1,60 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text } from 'react-native';
-import Navbar from './src/components/Navbar';
-import LandingPage from './src/pages/LandingPage';  // Import the LandingPage component
-import Login from './src/pages/Login';
-import Signup from './src/pages/Signup';
-import Gallery from './src/pages/Gallery';
-import PhotoUpload from './src/pages/PhotoUpload';
-import Outfit from './src/pages/OutfitSelector';
-import Profile from './src/pages/Profile';
-import Weather from './src/components/Weather';
-import { globalStyles } from './src/styles/styles';
+import React, { useState, useEffect } from "react";
+import { View, Text } from "react-native";
+import Navbar from "./src/components/Navbar";
+import LandingPage from "./src/pages/LandingPage"; 
+import Login from "./src/pages/Login";
+import Signup from "./src/pages/Signup";
+import Gallery from "./src/pages/Gallery";
+import PhotoUpload from "./src/pages/PhotoUpload";
+import Outfit from "./src/pages/OutfitSelector";
+import Profile from "./src/pages/Profile";
+import Weather from "./src/components/Weather";
+import Background from "./src/components/Background";
+import StyledText from "./src/components/StyledText";
+import { globalStyles } from "./src/styles/styles";
 
 interface AppProps {
   setScreen: (screen: string) => void;
 }
 
 const App: React.FC<AppProps> = () => {
-  const [screen, setScreen] = useState('Landing'); // Default screen is Landing
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // State to track login status
+  const [screen, setScreen] = useState("Landing"); // Default screen is Landing
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // Track login status
 
-
-  // Function to handle login
+  // Handle login
   const handleLoginSuccess = () => {
-    setIsLoggedIn(true);  // Set the user as logged in
-    setScreen('Home');    // Navigate to the Home screen after login
+    setIsLoggedIn(true);
+    setScreen("Home"); // Navigate to Home screen after login
   };
 
+  // Render the current screen
   const renderScreen = () => {
-    switch (screen) {      
-      // Leaving login and signup in case needed for testing later
-      // If needed, uncomment in navbar component
-      case 'Login':
+    switch (screen) {
+      case "Login":
         return <Login setScreen={setScreen} handleLoginSuccess={handleLoginSuccess} />;
-      case 'Signup':
+      case "Signup":
         return <Signup setScreen={setScreen} />;
-      case 'Gallery':
+      case "Gallery":
         return <Gallery />;
-      case 'Upload':
+      case "Upload":
         return <PhotoUpload />;
-      case 'Profile':
+      case "Profile":
         return <Profile />;
-      case 'Outfit':
+      case "Outfit":
         return <Outfit />;
-      case 'Landing':
+      case "Landing":
         return <LandingPage setScreen={setScreen} />;
-      case 'Home':
+      case "Home":
         return (
           <View style={globalStyles.container}>
-            <Text style={globalStyles.title}>Welcome to the Home Screen</Text>
+            <StyledText size={24} variant="title">Welcome to the Home Screen</StyledText>
             <Weather />
           </View>
         );
       default:
         return (
           <View style={globalStyles.container}>
+            
             <Text style={globalStyles.title}>Welcome to the App</Text>
             <Weather />
           </View>
@@ -63,8 +64,9 @@ const App: React.FC<AppProps> = () => {
 
   return (
     <View style={globalStyles.container}>
+      <Background /> 
       {renderScreen()}
-      {isLoggedIn && <Navbar setScreen={setScreen} />} 
+      {isLoggedIn && <Navbar setScreen={setScreen} />}
     </View>
   );
 };

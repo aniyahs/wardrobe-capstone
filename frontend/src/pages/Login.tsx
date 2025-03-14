@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, Alert } from "react-native";
 import { globalStyles } from "../styles/styles"; // Import shared styles
 import { loginUser } from "../api/authService"; // Import API function
+import StyledText from "../components/StyledText";
 
 interface LoginProps {
   setScreen: (screen: string) => void;
@@ -29,7 +30,7 @@ const Login: React.FC<LoginProps> = ({ setScreen, handleLoginSuccess }) => {
 
   return (
     <View style={globalStyles.container}>
-      <Text style={globalStyles.title}>Login</Text>
+      <StyledText size={24} variant="title">Login</StyledText>
       <TextInput
         style={globalStyles.input}
         placeholder="Email"
