@@ -1,5 +1,6 @@
 import React from "react";
 import { Text, StyleSheet, TextProps } from "react-native";
+import * as Font from "expo-font";
 
 interface StyledTextProps extends TextProps {
   size: number; // Font size passed dynamically
@@ -28,6 +29,7 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   subtitle: {
+    fontFamily: "Inter",
     color: "#DDD",
     textShadowColor: "rgba(0, 0, 0, 0.7)",
     textShadowOffset: { width: 0, height: 1 },

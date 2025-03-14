@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, Text } from "react-native";
 import Navbar from "./src/components/Navbar";
+import Header from "./src/components/Header";
 import LandingPage from "./src/pages/LandingPage"; 
 import Login from "./src/pages/Login";
 import Signup from "./src/pages/Signup";
@@ -54,7 +55,6 @@ const App: React.FC<AppProps> = () => {
       default:
         return (
           <View style={globalStyles.container}>
-            
             <Text style={globalStyles.title}>Welcome to the App</Text>
             <Weather />
           </View>
@@ -66,7 +66,12 @@ const App: React.FC<AppProps> = () => {
     <View style={globalStyles.container}>
       <Background /> 
       {renderScreen()}
-      {isLoggedIn && <Navbar setScreen={setScreen} />}
+      {isLoggedIn && (
+        <>
+          <Navbar setScreen={setScreen} />
+          <Header setScreen={setScreen} />
+        </>
+      )}
     </View>
   );
 };

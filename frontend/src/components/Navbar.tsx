@@ -35,10 +35,6 @@ const Navbar: React.FC<NavbarProps> = ({ setScreen }) => {
             <Text style={styles.navText}>Upload</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => setScreen("Profile")} style={styles.navButton}>
-            <Text style={styles.navText}>Profile</Text>
-          </TouchableOpacity>
-
           <TouchableOpacity onPress={() => setScreen("Outfit")} style={styles.navButton}>
             <Text style={styles.navText}>Outfit</Text>
           </TouchableOpacity>

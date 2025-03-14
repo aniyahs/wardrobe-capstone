@@ -10,6 +10,7 @@ export const globalStyles = StyleSheet.create({
     alignItems: "center",
     position: "relative", // Allows absolute layers
     paddingBottom: 60, // Space for navbar
+    paddingTop: 40, // Space for eventual header
   },
   backgroundWrapper: {
     ...StyleSheet.absoluteFillObject, // Covers entire screen
