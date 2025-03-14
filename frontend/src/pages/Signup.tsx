@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { globalStyles } from "../styles/styles";
 import { signupUser } from "../api/authService"; // Import signup API
 import StyledText from "../components/StyledText";
+import GradientButton from "../components/GradientButton"
 
 const Signup = ({ setScreen }: { setScreen: (screen: string) => void }) => {
     const [username, setUsername] = useState("");
@@ -50,11 +51,9 @@ const Signup = ({ setScreen }: { setScreen: (screen: string) => void }) => {
                 secureTextEntry
             />
 
-            {message ? <Text style={globalStyles.message}>{message}</Text> : null}
+            {message ? <StyledText size={16} variant="title">{message}</StyledText> : null}
 
-            <TouchableOpacity style={globalStyles.button} onPress={handleSignup}>
-                <Text style={globalStyles.buttonText}>Sign Up</Text>
-            </TouchableOpacity>
+            <GradientButton title="Signup" onPress={handleSignup} size="medium" />
 
             <TouchableOpacity onPress={() => setScreen("Login")}>
                 <Text style={globalStyles.link}>Already have an account? Login</Text>

@@ -38,7 +38,7 @@ const Weather: React.FC = () => {
   }
 
   if (!weatherData) {
-    return <Text>Loading...</Text>;
+    return <StyledText size={18} variant="subtitle">Loading...</StyledText>;
   }
   // Convert to Fahrenheit
   const temperature = Math.round((weatherData.temperature * 9) / 5 + 32); 

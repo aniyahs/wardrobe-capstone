@@ -3,6 +3,7 @@ import { View, Text, Button, StyleSheet, ActivityIndicator } from 'react-native'
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import StyledText from "../components/StyledText";
+import GradientButton from "../components/GradientButton"
 
 interface WardrobeItem {
   type: string;
@@ -116,7 +117,9 @@ const OutfitGeneratorScreen = () => {
       </View>
 
       {/* Generate Button */}
-      <Button title="Generate Outfit" onPress={generateOutfit} />
+      <View style={{ width: "100%", alignItems: "center", justifyContent: "center" }}>
+        <GradientButton title="Generate Outfit" onPress={generateOutfit} size="medium" style={{ alignSelf: "center" }}/>
+      </View>
 
       {/* Loader */}
       {loading && <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />}
@@ -137,19 +140,23 @@ const OutfitGeneratorScreen = () => {
 // ✅ Added Back Picker Styles & 10% Margin Wrapper
 const styles = StyleSheet.create({
   mainContainer: {
-    flex: 1,
-    margin: "10%", // ✅ Ensures 10% margins on all sides
+    flexGrow: 1,
+    width: "100%", // Ensure it takes full width
+    alignItems: "center", // Center items horizontally
+    justifyContent: "flex-start", // Ensure items stack properly
+    marginHorizontal: "10%", // ✅ Instead of padding
   },
 
   pickerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
-    width: "100%",
+    justifyContent: "space-between",
+    width: "80%",
     paddingHorizontal: 10,
     backgroundColor: "#3F342E",
     borderRadius: 10,
     marginBottom: 10,
+    paddingVertical: 2
   },
 
   pickerLabel: {
@@ -158,7 +165,7 @@ const styles = StyleSheet.create({
   },
 
   pickerWrapper: {
-    flexGrow: 1,
+    flex: 1,
   },
 
   picker: {

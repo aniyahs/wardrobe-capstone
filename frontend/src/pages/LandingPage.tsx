@@ -5,6 +5,7 @@ import Signup from "./Signup";
 import Login from "./Login";
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import auth from '@react-native-firebase/auth';
+import GradientButton from "../components/GradientButton"
 
 interface LandingPageProps {
   setScreen: (screen: string) => void;
@@ -45,25 +46,9 @@ const LandingPage: React.FC<LandingPageProps> = ({ setScreen }) => {
   return (
     <View style={globalStyles.container}>
       <Text style={globalStyles.title}>Welcome to Our App</Text>
-      
-      <TouchableOpacity
-        style={globalStyles.button}
-        onPress={() => setScreen("Login")}
-      >
-        <Text style={globalStyles.buttonText}>Login</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={globalStyles.button}
-        onPress={() => setScreen("Signup")}
-      >
-        <Text style={globalStyles.buttonText}>Signup</Text>
-      </TouchableOpacity>
-       <TouchableOpacity 
-        style={globalStyles.button} 
-        onPress={() => onGoogleButtonPress().then(() => console.log('Signed in with Google!'))}>
-          <Text style={globalStyles.buttonText}>Sign in with Google</Text>
-      </TouchableOpacity>
+      <GradientButton title="Login" onPress={() => setScreen("Login")} size="medium" />
+      <GradientButton title="Signup" onPress={() => setScreen("Signup")} size="medium" />
+      <GradientButton title="Sign in with Google" onPress={() => onGoogleButtonPress().then(() => console.log('Signed in with Google!'))} size="medium" />
     </View>
   );
 };

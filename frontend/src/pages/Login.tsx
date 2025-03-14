@@ -5,6 +5,7 @@ import { GoogleSignin } from '@react-native-google-signin/google-signin'; // Imp
 import auth from '@react-native-firebase/auth'; // Import Firebase auth
 import { loginUser } from "../api/authService"; // Import API function
 import StyledText from "../components/StyledText"; // Import StyledText component
+import GradientButton from "../components/GradientButton"
 
 interface LoginProps {
   setScreen: (screen: string) => void;
@@ -77,12 +78,8 @@ const Login: React.FC<LoginProps> = ({ setScreen, handleLoginSuccess }) => {
         onChangeText={setPassword}
         secureTextEntry
       />
-      <TouchableOpacity style={globalStyles.button} onPress={handleLogin}>
-        <Text style={globalStyles.buttonText}>Login</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={globalStyles.button} onPress={() => onGoogleButtonPress().then(() => console.log('Signed in with Google!'))}>
-        <Text style={globalStyles.buttonText}>Sign in with Google</Text>
-      </TouchableOpacity>
+      <GradientButton title="Login" onPress={handleLogin} size="medium" />
+      <GradientButton title="Sign in with Google" onPress={() => onGoogleButtonPress().then(() => console.log('Signed in with Google!'))} size="medium" />
     </View>
   );
 };

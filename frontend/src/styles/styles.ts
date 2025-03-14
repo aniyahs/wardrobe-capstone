@@ -79,6 +79,7 @@ export const globalStyles = StyleSheet.create({
 
   // Alerts and messages
   message: {
+    color: "#fff",
     marginVertical: 10,
     fontWeight: "bold",
   },
