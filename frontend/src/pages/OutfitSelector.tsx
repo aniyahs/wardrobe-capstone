@@ -1,9 +1,11 @@
+// src/components/OutfitSelector.tsx
 import React, { useState } from 'react';
 import { View, Text, Button, StyleSheet, ActivityIndicator } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import StyledText from "../components/StyledText";
-import GradientButton from "../components/GradientButton"
+import GradientButton from "../components/GradientButton";
+import Weather from "../components/Weather";
 
 interface WardrobeItem {
   type: string;
@@ -26,23 +28,18 @@ function getContrastColor(hexColor: string): string {
 }
 
 const renderSquare = (item?: WardrobeItem) => {
-  if (!item || !item.type || !item.type.trim()) {
-    return null;
-  }
-
+  if (!item || !item.type || !item.type.trim()) return null;
   const contrastColor = getContrastColor(item.color);
   return (
-    <View style={[styles.square, { backgroundColor: item.color }]}>
+    <View style={[styles.square, { backgroundColor: item.color }]}> 
       <Text style={[styles.squareText, { color: contrastColor }]}>{item.type}</Text>
     </View>
   );
 };
 
 const renderRow = (items: (WardrobeItem | undefined)[]) => {
-  const validItems = items.filter((item) => item && item.type && item.type.trim());
-
+  const validItems = items.filter(item => item && item.type && item.type.trim());
   if (validItems.length === 0) return null;
-
   return (
     <View style={styles.row}>
       {validItems.map((item, index) => (
@@ -57,33 +54,39 @@ const OutfitGeneratorScreen = () => {
   const [formality, setFormality] = useState('Casual');
   const [outfit, setOutfit] = useState<Outfit | null>(null);
   const [loading, setLoading] = useState(false);
+  const [weather, setWeather] = useState<{ temperature: number; weathercode: number } | null>(null);
 
   const generateOutfit = () => {
     setLoading(true);
-    axios
-      .post('http://10.0.2.2:5001/outfit/generate-outfit', { season, formality })
-      .then((response) => {
-        setOutfit(response.data);
-        setLoading(false);
-      })
-      .catch((error) => {
-        console.error('Error generating outfit:', error);
-        setLoading(false);
-      });
+    axios.post('http://10.0.2.2:5001/outfit/generate-outfit', {
+      season,
+      formality,
+      temperature: weather?.temperature,
+      weathercode: weather?.weathercode,
+      user_id: 'mock-user-id' // Replace with real user ID
+    })
+    .then(response => {
+      setOutfit(response.data);
+      setLoading(false);
+    })
+    .catch(error => {
+      console.error('Error generating outfit:', error);
+      setLoading(false);
+    });
   };
 
   return (
     <View style={styles.mainContainer}>
       <StyledText size={24} variant="title">Outfit Generator</StyledText>
+      <Weather onWeatherFetched={(w) => setWeather(w)} />
 
-      {/* Season Picker */}
       <View style={styles.pickerContainer}>
         <StyledText size={18} variant="subtitle" style={styles.pickerLabel}>Season:</StyledText>
         <View style={styles.pickerWrapper}>
           <Picker
             selectedValue={season}
             style={styles.picker}
-            onValueChange={(value) => setSeason(value)}
+            onValueChange={setSeason}
             dropdownIconColor="#DDD"
             mode="dropdown"
             itemStyle={styles.pickerItem}
@@ -96,14 +99,13 @@ const OutfitGeneratorScreen = () => {
         </View>
       </View>
 
-      {/* Formality Picker */}
       <View style={styles.pickerContainer}>
         <StyledText size={18} variant="subtitle" style={styles.pickerLabel}>Formality:</StyledText>
         <View style={styles.pickerWrapper}>
           <Picker
             selectedValue={formality}
             style={styles.picker}
-            onValueChange={(value) => setFormality(value)}
+            onValueChange={setFormality}
             dropdownIconColor="#DDD"
             mode="dropdown"
             itemStyle={styles.pickerItem}
@@ -116,15 +118,12 @@ const OutfitGeneratorScreen = () => {
         </View>
       </View>
 
-      {/* Generate Button */}
       <View style={{ width: "100%", alignItems: "center", justifyContent: "center" }}>
         <GradientButton title="Generate Outfit" onPress={generateOutfit} size="medium" style={{ alignSelf: "center" }}/>
       </View>
 
-      {/* Loader */}
       {loading && <ActivityIndicator size="large" color="#0000ff" style={styles.loader} />}
 
-      {/* Outfit Display */}
       {outfit && (
         <View style={styles.outfitContainer}>
           {renderRow([outfit.top, outfit.layer1, outfit.layer2])}
@@ -137,16 +136,14 @@ const OutfitGeneratorScreen = () => {
   );
 };
 
-// ✅ Added Back Picker Styles & 10% Margin Wrapper
 const styles = StyleSheet.create({
   mainContainer: {
     flexGrow: 1,
-    width: "100%", // Ensure it takes full width
-    alignItems: "center", // Center items horizontally
-    justifyContent: "flex-start", // Ensure items stack properly
-    marginHorizontal: "10%", // ✅ Instead of padding
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "flex-start",
+    marginHorizontal: "10%",
   },
-
   pickerContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -156,57 +153,39 @@ const styles = StyleSheet.create({
     backgroundColor: "#3F342E",
     borderRadius: 10,
     marginBottom: 10,
-    paddingVertical: 2
+    paddingVertical: 2,
   },
-
-  pickerLabel: {
-    flexShrink: 1,
-    marginRight: 8,
-  },
-
-  pickerWrapper: {
-    flex: 1,
-  },
-
+  pickerLabel: { flexShrink: 1, marginRight: 8 },
+  pickerWrapper: { flex: 1 },
   picker: {
     height: 50,
-    color: "#DDD", // ✅ Match subtitle color
+    color: "#DDD",
     textAlign: "center",
     fontSize: 14,
     backgroundColor: "#3F342E",
     fontWeight: "bold",
   },
-
   pickerItem: {
-    color: "#DDD", // ✅ Match subtitle color
+    color: "#DDD",
     fontSize: 16,
     textShadowColor: "rgba(0, 0, 0, 0.7)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 5,
     backgroundColor: "#3F342E",
   },
-
   pickerDropdown: {
-    backgroundColor: "#3F342E", // ✅ Ensures dropdown matches the picker
-    borderRadius: 10, // ✅ Fixes the white border issue
-    overflow: "hidden", // ✅ Prevents extra white space
+    backgroundColor: "#3F342E",
+    borderRadius: 10,
+    overflow: "hidden",
   },
-
-  loader: {
-    marginVertical: 16,
-  },
-
-  outfitContainer: {
-    marginTop: 32,
-  },
-
+  loader: { marginVertical: 16 },
+  outfitContainer: { marginTop: 32 },
   row: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
   },
-
   square: {
     width: 100,
     height: 100,
@@ -216,10 +195,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-
-  squareText: {
-    fontWeight: 'bold',
-  },
+  squareText: { fontWeight: 'bold' },
 });
 
 export default OutfitGeneratorScreen;
