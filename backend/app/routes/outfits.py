@@ -50,11 +50,13 @@ def generate_outfit():
     data = request.get_json()
     season = data.get('season', 'Spring')
     formality = data.get('formality', 'Casual')
+    temperature = data.get("temperature")  
+    weathercode = data.get("weathercode") 
     # Ensure season is a list.
     if isinstance(season, str):
         season = [season]
     try:
-        outfit_list = generate_outfit_cps(season, formality, wardrobeItems)
+        outfit_list = generate_outfit_cps(season, formality, wardrobeItems, temperature,weathercode)
         if outfit_list is None:
             return jsonify({"error": "No valid outfit found"}), 400
         slots = map_outfit_to_slots(outfit_list)
