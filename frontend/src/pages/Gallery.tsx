@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Image, FlatList, ScrollView, Dimensions } from "react-native";
 import { globalStyles } from "../styles/styles";
+import { useClothing } from "../components/ClothingContext";
 
 const images = [
   "https://cdn.mos.cms.futurecdn.net/whowhatwear/posts/285445/big-collar-shirts-285445-1581368086628-square-1200-80.jpg",
@@ -45,18 +46,20 @@ const screenWidth = Dimensions.get("window").width;
 const imageSize = screenWidth / 3 - 10; // Subtracting margin for spacing
 
 const Gallery = () => {
+  const { clothingItems } = useClothing(); // Get clothing data from context
+
   return (
     <FlatList
-      data={images}
-      keyExtractor={(item, index) => index.toString()}
-      numColumns={3} // Forces 3 images per row
+      data={clothingItems}
+      keyExtractor={(item) => item._id}
+      numColumns={3}
       renderItem={({ item }) => (
         <View style={{ margin: 5, width: imageSize, height: imageSize }}>
-          <Image source={{ uri: item }} style={globalStyles.image} />
+          <Image source={{ uri: item.imageUrl }} style={globalStyles.image} />
         </View>
       )}
       contentContainerStyle={globalStyles.container}
-      showsVerticalScrollIndicator={false} // Hide the vertical scroll indicator
+      showsVerticalScrollIndicator={false}
     />
   );
 };

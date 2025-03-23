@@ -37,5 +37,18 @@ router.post('/', async (req, res) => {
     }
 });
 
+// GET route to fetch all photos
+router.get("/", async (req, res) => {
+    try {
+        console.log("🔍 Fetching photos...");
+        const photos = await Photo.find();  // Fetch all photos from the database
+        res.json(photos);  // Send photos as response
+    } catch (error) {
+        console.error("❌ Error fetching photos:", error);
+        res.status(500).json({ error: "Error fetching photos." });
+    }
+});
+
+
 
 module.exports = router;
