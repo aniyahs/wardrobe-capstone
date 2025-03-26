@@ -6,6 +6,8 @@ import auth from '@react-native-firebase/auth'; // Import Firebase auth
 import { loginUser } from "../api/authService"; // Import API function
 import StyledText from "../components/StyledText"; // Import StyledText component
 import GradientButton from "../components/GradientButton"
+import { storeUserId  } from "../api/authService";
+
 
 interface LoginProps {
   setScreen: (screen: string) => void;
@@ -55,7 +57,8 @@ const Login: React.FC<LoginProps> = ({ setScreen, handleLoginSuccess }) => {
 
     try {
       const response = await loginUser(email, password);
-      Alert.alert("Success", response.message); // Show success message
+      // Alert.alert("Success", response.message); // Show success message
+      await storeUserId(response.user_id);
       handleLoginSuccess(response.username, response.user_id); // Pass user data to App.tsx
     } catch (error) {
       Alert.alert("Error", (error as Error).message);
