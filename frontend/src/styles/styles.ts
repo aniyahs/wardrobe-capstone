@@ -12,6 +12,7 @@ export const globalStyles = StyleSheet.create({
     paddingBottom: 60, // Space for navbar
     paddingTop: 40, // Space for eventual header
   },
+  
   backgroundWrapper: {
     ...StyleSheet.absoluteFillObject, // Covers entire screen
     zIndex: -1, // Behind all content

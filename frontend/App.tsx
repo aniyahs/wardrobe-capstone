@@ -49,23 +49,27 @@ const App: React.FC<AppProps> = () => {
         return (
           <View style={globalStyles.container}>
             <StyledText size={24} variant="title">Welcome to the Home Screen</StyledText>
-            <Weather />
+            {/* <Weather /> We got rate limited from too many requests*/}
           </View>
         );
       default:
         return (
           <View style={globalStyles.container}>
             <Text style={globalStyles.title}>Welcome to the App</Text>
-            <Weather />
+            {/* <Weather /> We got rate limited from too many requests*/}
           </View>
         );
     }
   };
 
   return (
-    <View style={globalStyles.container}>
-      <Background /> 
-      {renderScreen()}
+    <View style={{ flex: 1, position: "relative" }}>
+      <Background />
+  
+      <View style={globalStyles.container}>
+        {renderScreen()}
+      </View>
+  
       {isLoggedIn && (
         <>
           <Navbar setScreen={setScreen} />

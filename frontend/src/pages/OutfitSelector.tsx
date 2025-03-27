@@ -78,45 +78,60 @@ const OutfitGeneratorScreen = () => {
   return (
     <View style={styles.mainContainer}>
       <StyledText size={24} variant="title">Outfit Generator</StyledText>
+      {/*}
       <Weather onWeatherFetched={(w) => setWeather(w)} />
+      We got rate limited from too many requests
+      */}
+      <View style={{ alignItems: "center", marginBottom: 0 }}>
+        {/* Drop shadow layer */}
+        <View style={styles.dropShadow} />
 
-      <View style={styles.pickerContainer}>
-        <StyledText size={18} variant="subtitle" style={styles.pickerLabel}>Season:</StyledText>
-        <View style={styles.pickerWrapper}>
-          <Picker
-            selectedValue={season}
-            style={styles.picker}
-            onValueChange={setSeason}
-            dropdownIconColor="#DDD"
-            mode="dropdown"
-            itemStyle={styles.pickerItem}
-          >
-            <Picker.Item label="Summer" value="Summer" style={styles.pickerItem}/>
-            <Picker.Item label="Spring" value="Spring" style={styles.pickerItem}/>
-            <Picker.Item label="Fall" value="Fall" style={styles.pickerItem}/>
-            <Picker.Item label="Winter" value="Winter" style={styles.pickerItem}/>
-          </Picker>
+        {/* Picker with label */}
+        <View style={styles.pickerContainer}>
+          <StyledText size={18} variant="subtitle" style={styles.pickerLabel}>Season:</StyledText>
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={season}
+              style={styles.picker}
+              onValueChange={setSeason}
+              dropdownIconColor="#DDD"
+              mode="dropdown"
+              itemStyle={styles.pickerItem}
+            >
+              <Picker.Item label="Summer" value="Summer" style={styles.pickerItem}/>
+              <Picker.Item label="Spring" value="Spring" style={styles.pickerItem}/>
+              <Picker.Item label="Fall" value="Fall" style={styles.pickerItem}/>
+              <Picker.Item label="Winter" value="Winter" style={styles.pickerItem}/>
+            </Picker>
+          </View>
         </View>
       </View>
 
-      <View style={styles.pickerContainer}>
+      <View style={{ alignItems: "center", marginBottom: 0 }}>
+        {/* Drop shadow layer */}
+        <View style={styles.dropShadow} />
+
+        {/* Picker with label */}
+        <View style={styles.pickerContainer}>
         <StyledText size={18} variant="subtitle" style={styles.pickerLabel}>Formality:</StyledText>
-        <View style={styles.pickerWrapper}>
-          <Picker
-            selectedValue={formality}
-            style={styles.picker}
-            onValueChange={setFormality}
-            dropdownIconColor="#DDD"
-            mode="dropdown"
-            itemStyle={styles.pickerItem}
-          >
-            <Picker.Item label="Casual" value="Casual" style={styles.pickerItem}/>
-            <Picker.Item label="Business Casual" value="Business Casual" style={styles.pickerItem}/>
-            <Picker.Item label="Formal" value="Formal" style={styles.pickerItem}/>
-            <Picker.Item label="Smart Casual" value="Smart Casual" style={styles.pickerItem}/>
-          </Picker>
+          <View style={styles.pickerWrapper}>
+            <Picker
+              selectedValue={season}
+              style={styles.picker}
+              onValueChange={setSeason}
+              dropdownIconColor="#DDD"
+              mode="dropdown"
+              itemStyle={styles.pickerItem}
+            >
+              <Picker.Item label="Casual" value="Casual" style={styles.pickerItem}/>
+              <Picker.Item label="Business Casual" value="Business Casual" style={styles.pickerItem}/>
+              <Picker.Item label="Formal" value="Formal" style={styles.pickerItem}/>
+              <Picker.Item label="Smart Casual" value="Smart Casual" style={styles.pickerItem}/>
+            </Picker>
+          </View>
         </View>
       </View>
+
 
       <View style={{ width: "100%", alignItems: "center", justifyContent: "center" }}>
         <GradientButton title="Generate Outfit" onPress={generateOutfit} size="medium" style={{ alignSelf: "center" }}/>
@@ -144,6 +159,17 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     marginHorizontal: "10%",
   },
+  dropShadow: {
+    position: "absolute",
+    bottom: 6,
+    width: "80%", // match pickerContainer width
+    height: 10,
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+    zIndex: -1,
+  },
+  
   pickerContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -158,7 +184,7 @@ const styles = StyleSheet.create({
   pickerLabel: { flexShrink: 1, marginRight: 8 },
   pickerWrapper: { flex: 1 },
   picker: {
-    height: 50,
+    height: 60,
     color: "#DDD",
     textAlign: "center",
     fontSize: 14,
