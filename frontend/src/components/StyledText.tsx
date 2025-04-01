@@ -4,7 +4,7 @@ import * as Font from "expo-font";
 
 interface StyledTextProps extends TextProps {
   size: number; // Font size passed dynamically
-  variant?: "title" | "subtitle"; // Default is "title"
+  variant?: "title" | "subtitle" | "inter" | "cursiveFont"; // Default is "title"
 }
 
 const StyledText: React.FC<StyledTextProps> = ({ size, variant = "title", style, children, ...props }) => {
@@ -36,6 +36,24 @@ const styles = StyleSheet.create({
     textShadowRadius: 5,
     textAlign: "center",
   },
+  inter: {
+    fontFamily: "Inter_18pt-Regular",
+    color: "#EEE",
+    textShadowColor: "rgba(0, 0, 0, 0.7)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 5,
+    textAlign: "center",
+    marginBottom: 5
+  },
+  cursiveFont: {
+    fontFamily: "Birthstone-Regular",
+    color: "#EEE",
+    textShadowColor: "rgba(0, 0, 0, 0.7)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 5,
+    textAlign: "center",
+    marginBottom: 5
+  }
 });
 
 export default StyledText;

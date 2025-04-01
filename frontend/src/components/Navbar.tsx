@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     position: "absolute",
-    bottom: 20, // Ensure proper placement at the bottom
+    bottom: 30, // Ensure proper placement at the bottom
     width: "100%",
     ...Platform.select({
       ios: {
