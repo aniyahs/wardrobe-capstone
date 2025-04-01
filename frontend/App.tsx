@@ -13,6 +13,7 @@ import Weather from "./src/components/Weather";
 import Background from "./src/components/Background";
 import StyledText from "./src/components/StyledText";
 import { globalStyles } from "./src/styles/styles";
+import { ClothingProvider } from "./src/components/ClothingContext";
 
 interface AppProps {
   setScreen: (screen: string) => void;
@@ -63,6 +64,7 @@ const App: React.FC<AppProps> = () => {
   };
 
   return (
+    <ClothingProvider>
     <View style={{ flex: 1, position: "relative" }}>
       <Background />
   
@@ -77,6 +79,7 @@ const App: React.FC<AppProps> = () => {
         </>
       )}
     </View>
+    </ClothingProvider>
   );
 };
 
