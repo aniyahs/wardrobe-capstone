@@ -10,7 +10,9 @@ import {
   SafeAreaView,
   TouchableOpacity,
   ScrollView,
+  Pressable,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { globalStyles } from "../styles/styles";
 import { useClothing } from "../components/ClothingContext";
 import type { ClothingItem } from "../components/ClothingContext";
@@ -18,43 +20,161 @@ import type { ClothingItem } from "../components/ClothingContext";
 const screenWidth = Dimensions.get("window").width;
 const imageSize = screenWidth / 3 - 10;
 
-const Gallery = () => {
-  console.log("📸 Rendering Gallery component...");
+const styleOptionsMap: Record<string, string[]> = {
+  Tops: ["T-Shirt", "Long Sleeve Shirt", "Blouse", "Tank Top", "Polo", "Button-Up Shirt"],
+  Bottoms: ["Jeans", "Chinos", "Shorts", "Trousers", "Joggers", "Leggings", "Skirt"],
+  Outerwear: ["Jacket", "Blazer", "Coat", "Vest", "Windbreaker", "Raincoat", "Hoodie", "Sweatshirt", "Sweater"],
+  Footwear: ["Sneakers", "Boots", "Dress Shoes", "Loafers", "Sandals", "Heels"],
+  Accessories: ["Hat", "Belt", "Scarf", "Gloves", "Sunglasses", "Watch", "Tie"]
+};
 
+const allFilterOptions = {
+  "Color": ["Black", "White", "Gray", "Navy", "Red", "Green", "Beige", "Yellow"],
+  "Texture": ["Cotton", "Denim", "Wool", "Linen", "Fleece", "Leather", "Suede"],
+  "Formality": ["Casual", "Business Casual", "Formal"],
+  "Size": ["XS", "S", "M", "L", "XL"],
+  "Season": ["Summer", "Fall", "Winter", "Spring"]
+};
+
+const Gallery = () => {
   const { clothingItems, loading, error, fetchClothingItems } = useClothing();
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
+  const [filterVisible, setFilterVisible] = useState(false);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
   useEffect(() => {
     fetchClothingItems();
   }, []);
 
-  if (loading) {
-    return (
-      <View style={globalStyles.centered}>
-        <ActivityIndicator size="large" color="#000" />
-        <Text>Loading your wardrobe...</Text>
-      </View>
-    );
+  let filteredItems = clothingItems?.filter((item) => {
+    const matchesType = selectedTypes.length === 0 || selectedTypes.includes(item.type);
+    const itemTags = [
+      item.style,
+      item.color,
+      item.texture,
+      item.formality,
+      item.size,
+      ...(item.season || [])
+    ];
+    const matchesTags = selectedTags.length === 0 || itemTags.some(tag => selectedTags.includes(tag));
+    return matchesType && matchesTags;
+  });
+
+  if (sortOrder === "newest") {
+    filteredItems = filteredItems?.slice().reverse();
   }
 
-  if (error) {
-    return (
-      <View style={globalStyles.centered}>
-        <Text style={{ color: "red" }}>Error fetching clothing items.</Text>
-      </View>
-    );
-  }
+  const toggleSelection = (value: string, selected: string[], setSelected: (val: string[]) => void) => {
+    if (selected.includes(value)) {
+      setSelected(selected.filter((v) => v !== value));
+    } else {
+      setSelected([...selected, value]);
+    }
+  };
 
-  if (!clothingItems || clothingItems.length === 0) {
+  const renderTagButtons = (tags: string[], selectedList: string[], setSelectedList: (val: string[]) => void) => (
+    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+      {tags.map((tag) => (
+        <Pressable
+          key={tag}
+          onPress={() => toggleSelection(tag, selectedList, setSelectedList)}
+          style={{
+            padding: 8,
+            backgroundColor: selectedList.includes(tag) ? "#444" : "#ddd",
+            borderRadius: 8,
+            marginBottom: 8,
+          }}
+        >
+          <Text style={{ color: selectedList.includes(tag) ? "#fff" : "#000", flexWrap: "wrap" }}>{tag}</Text>
+        </Pressable>
+      ))}
+    </View>
+  );
+
+  const renderFilterSection = () => {
+    const availableStyles = selectedTypes.length
+      ? selectedTypes.flatMap(type => styleOptionsMap[type] || [])
+      : [];
+
     return (
-      <View style={globalStyles.centered}>
-        <Text>No clothing items found. Add some to your wardrobe!</Text>
-      </View>
+      <ScrollView
+        style={{ padding: 10, backgroundColor: "#f5f5f5", maxHeight: 400 }}
+        nestedScrollEnabled={true}
+        showsVerticalScrollIndicator={true}
+      >
+        <Text style={{ fontWeight: "bold" }}>Sort By</Text>
+        <Picker
+          selectedValue={sortOrder}
+          onValueChange={(val) => setSortOrder(val)}
+          style={{ backgroundColor: "#fff" }}
+        >
+          <Picker.Item label="Newest First" value="newest" />
+          <Picker.Item label="Oldest First" value="oldest" />
+        </Picker>
+
+        <View style={{ marginTop: 12 }}>
+          <Text style={{ fontWeight: "bold" }}>Type</Text>
+          {renderTagButtons(Object.keys(styleOptionsMap), selectedTypes, setSelectedTypes)}
+        </View>
+
+        {availableStyles.length > 0 && (
+          <View style={{ marginTop: 12 }}>
+            <Text style={{ fontWeight: "bold" }}>Style</Text>
+            {renderTagButtons(availableStyles, selectedTags, setSelectedTags)}
+          </View>
+        )}
+
+        {Object.entries(allFilterOptions).map(([category, tags]) => (
+          <View key={category} style={{ marginTop: 12 }}>
+            <Text style={{ fontWeight: "bold" }}>{category}</Text>
+            {renderTagButtons(tags, selectedTags, setSelectedTags)}
+          </View>
+        ))}
+      </ScrollView>
     );
-  }
+  };
 
   return (
     <View style={{ flex: 1 }}>
+      <FlatList
+        data={filteredItems}
+        keyExtractor={(item) => item._id}
+        numColumns={3}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => setSelectedItem(item)}>
+            <View style={{ width: imageSize, height: imageSize, padding: 2 }}>
+              <Image
+                source={{ uri: item.imageUrl }}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  resizeMode: "cover",
+                  borderRadius: 5,
+                  backgroundColor: "#eee",
+                }}
+              />
+            </View>
+          </TouchableOpacity>
+        )}
+        ListHeaderComponent={
+          <View style={{ marginTop: 50, marginBottom: 10 }}>
+            <Pressable
+              onPress={() => setFilterVisible((prev) => !prev)}
+              style={{ padding: 12, backgroundColor: "#ccc", alignItems: "center" }}
+            >
+              <Text style={{ fontWeight: "bold" }}>Toggle Filters</Text>
+            </Pressable>
+            {filterVisible && renderFilterSection()}
+          </View>
+        }
+        contentContainerStyle={{ paddingTop: 10, paddingBottom: 20, paddingHorizontal: 5 }}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        nestedScrollEnabled={true}
+      />
+
       <Modal
         visible={selectedItem != null}
         animationType="slide"
@@ -81,10 +201,7 @@ const Gallery = () => {
                     resizeMode: "cover",
                     borderRadius: 12,
                     marginBottom: 24,
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 2 },
-                    shadowOpacity: 0.3,
-                    shadowRadius: 4
+                    backgroundColor: "#ccc",
                   }}
                 />
 
@@ -140,29 +257,6 @@ const Gallery = () => {
           </ScrollView>
         </SafeAreaView>
       </Modal>
-
-      <FlatList
-        data={clothingItems}
-        keyExtractor={(item) => item._id}
-        numColumns={3}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => setSelectedItem(item)}>
-            <View style={{ width: imageSize, height: imageSize, padding: 2 }}>
-              <Image
-                source={{ uri: item.imageUrl }}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  resizeMode: "cover",
-                  borderRadius: 5,
-                }}
-              />
-            </View>
-          </TouchableOpacity>
-        )}
-        contentContainerStyle={{ alignItems: "flex-start", paddingVertical: 10 }}
-        showsVerticalScrollIndicator={false}
-      />
     </View>
   );
 };

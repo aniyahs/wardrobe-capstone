@@ -13,15 +13,18 @@ def add_item():
     data = request.json
     
     item = {
-        "user_id": data["user_id"], 
-        "name": data["name"],
-        "category": data["category"],
-        "color": data["color"],
-        "size": data["size"],
-        "season": data["season"],
-        "image_url": data["image_url"],
-        "tags": data.get("tags", []) 
-    }
+    "userId": data["userId"],
+    "photoUrl": data["photoUrl"],
+    "type": data["type"],
+    "style": data["style"],
+    "color": data["color"],
+    "texture": data["texture"],
+    "season": data["season"],         # should be an array
+    "formality": data["formality"],
+    "size": data["size"],
+    "favorite": data["favorite"],     # should be boolean
+}
+
     
     result = wardrobe_collection.insert_one(item)
     return jsonify({"message": "Item added", "item_id": str(result.inserted_id)}), 201

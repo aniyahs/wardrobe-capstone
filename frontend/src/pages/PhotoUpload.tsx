@@ -53,6 +53,20 @@ const PhotoUpload = () => {
         } else if (response.assets && response.assets[0]?.uri) {
           const imageUri = response.assets[0].uri;
           setSelectedImage(imageUri);
+
+          setPickerValues([
+            "Tops",
+            "T-Shirt",
+            "Black",
+            "Cotton",
+            "",
+            "Casual",
+            "XS",
+            "",
+            "Yes",
+          ]);
+
+          setSelectedSeason([]);
         } else {
           Alert.alert("Error", "No image selected");
         }
@@ -60,29 +74,49 @@ const PhotoUpload = () => {
     );
   };
 
+
   const handleUpload = async () => {
     if (!selectedImage) return;
-
+  
     setIsUploading(true);
-
+  
     try {
       const downloadUrl = await uploadImageToStorage(selectedImage);
       const userId = await getCurrentUserId();
-
+  
       if (!userId) throw new Error("User not logged in");
 
-      console.log("📡 Saving photo to Flask backend...", { userId, downloadUrl });
-      await savePhotoUrl(userId, downloadUrl);
+      console.log("📋 pickerValues:", pickerValues);
 
+      const itemData = {
+        userId,
+        photoUrl: downloadUrl,
+        type: pickerValues[0],         // formerly 'category'
+        style: pickerValues[1],        // formerly 'name'
+        color: pickerValues[2],
+        texture: pickerValues[3],
+        formality: pickerValues[5],
+        size: pickerValues[6],
+        favorite: pickerValues[8] === "Yes", // convert to boolean
+        season: selectedSeason,              // keep as array
+      };
+      
+  
+      console.log("📡 Uploading item:", itemData);
+      await savePhotoUrl(itemData);  // Update function signature below
+  
       Alert.alert("Success", "Image uploaded and saved to MongoDB!");
       setSelectedImage(null);
       setPickerValues(Array(9).fill(""));
+      setSelectedSeason([]);
     } catch (err) {
       console.error("❌ Upload failed:", err);
+      Alert.alert("Upload Failed", "Could not upload image.");
     } finally {
       setIsUploading(false);
     }
   };
+  
 
   return (
     <View style={globalStyles.container}>
