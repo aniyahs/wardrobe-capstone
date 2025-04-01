@@ -79,7 +79,13 @@ def delete_wardrobe_item(item_id):
 @wardrobe_bp.route("/clothing", methods=["GET"])
 def get_all_wardrobe_items():
     try:
-        items = wardrobe_collection.find()  # Optionally filter by user_id if needed
+        user_id = request.args.get("userId")
+        if user_id:
+            items = wardrobe_collection.find({"userId": user_id})
+        else:
+            items = wardrobe_collection.find()
+        
+       
         item_list = []
         for item in items:
             item["_id"] = str(item["_id"])

@@ -135,7 +135,13 @@ const Gallery = () => {
       </ScrollView>
     );
   };
-
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color="#5EB0E5" />
+      </View>
+    );
+  }
   return (
     <View style={{ flex: 1 }}>
       <FlatList

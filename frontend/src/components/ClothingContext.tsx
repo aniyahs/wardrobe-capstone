@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
+import { getCurrentUserId } from "../api/authService";
 
 // Define the structure of a clothing item
 export interface ClothingItem {
@@ -36,8 +37,11 @@ export const ClothingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setLoading(true);
     setError(null);
     try {
-      console.log("Fetching clothing items from backend...");
-      const response = await fetch("http://10.0.2.2:5001/wardrobe/clothing");
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error("User not logged in");
+
+      console.log("Fetching clothing items for user:", userId);
+      const response = await fetch(`http://10.0.2.2:5001/wardrobe/clothing?userId=${userId}`);
 
       if (!response.ok) {
         throw new Error(`Failed to fetch clothing items. Status: ${response.status}`);

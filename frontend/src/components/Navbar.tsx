@@ -1,6 +1,7 @@
 import React from "react";
 import { Text, TouchableOpacity, StyleSheet, View, Platform } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
+import StyledText from "./StyledText";
 
 interface NavbarProps {
   setScreen: (screen: string) => void;
@@ -23,21 +24,10 @@ const Navbar: React.FC<NavbarProps> = ({ setScreen }) => {
           {/* Overlay with 83% Opacity */}
           <View style={styles.overlay} />
 
-          <TouchableOpacity onPress={() => setScreen("Home")} style={styles.navButton}>
-            <Text style={styles.navText}>Home</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => setScreen("Gallery")} style={styles.navButton}>
-            <Text style={styles.navText}>Gallery</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => setScreen("Upload")} style={styles.navButton}>
-            <Text style={styles.navText}>Upload</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => setScreen("Outfit")} style={styles.navButton}>
-            <Text style={styles.navText}>Outfit</Text>
-          </TouchableOpacity>
+          <StyledText onPress={() => setScreen("Home")} size={28} variant="cursiveFont">Home</StyledText>
+          <StyledText onPress={() => setScreen("Gallery")} size={28} variant="cursiveFont">Gallery</StyledText>
+          <StyledText onPress={() => setScreen("Upload")} size={28} variant="cursiveFont">Upload</StyledText>
+          <StyledText onPress={() => setScreen("Outfit")} size={28} variant="cursiveFont">Outfit</StyledText>
         </LinearGradient>
       </View>
     </View>
