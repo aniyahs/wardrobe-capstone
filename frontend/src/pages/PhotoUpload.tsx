@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { View, Image, Alert, ActivityIndicator, StyleSheet, Text } from "react-native";
+import {
+  View,
+  Image,
+  Alert,
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+} from "react-native";
 import { launchImageLibrary } from "react-native-image-picker";
 import { globalStyles } from "../styles/styles";
 import { uploadImageToStorage } from "../components/Firebase";
@@ -7,12 +14,15 @@ import { savePhotoUrl } from "../api/uploadService";
 import { getCurrentUserId } from "../api/authService";
 import GradientButton from "../components/GradientButton";
 import { Picker } from "@react-native-picker/picker";
-import DropShadow from "../components/DropShadow";
+import  ColorPicker  from "react-native-wheel-color-picker";
 
 const PhotoUpload = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [pickerValues, setPickerValues] = useState<string[]>(Array(9).fill(""));
+  const [selectedHexColor, setSelectedHexColor] = useState<string>("#000000");
+  const [step, setStep] = useState<"color" | "tags">("color");
+
   const styleOptionsMap: Record<string, string[]> = {
     Tops: ["T-Shirt", "Long Sleeve Shirt", "Blouse", "Tank Top", "Polo", "Button-Up Shirt"],
     Bottoms: ["Jeans", "Chinos", "Shorts", "Trousers", "Joggers", "Leggings", "Skirt"],
@@ -66,7 +76,9 @@ const PhotoUpload = () => {
             "Yes",
           ]);
 
+          setSelectedHexColor("#FFFFFF");
           setSelectedSeason([]);
+          setStep("color");
         } else {
           Alert.alert("Error", "No image selected");
         }
@@ -74,38 +86,36 @@ const PhotoUpload = () => {
     );
   };
 
+  
 
   const handleUpload = async () => {
     if (!selectedImage) return;
-  
+
     setIsUploading(true);
-  
+
     try {
       const downloadUrl = await uploadImageToStorage(selectedImage);
       const userId = await getCurrentUserId();
-  
-      if (!userId) throw new Error("User not logged in");
 
-      console.log("📋 pickerValues:", pickerValues);
+      if (!userId) throw new Error("User not logged in");
 
       const itemData = {
         userId,
         photoUrl: downloadUrl,
-        type: pickerValues[0],         // formerly 'category'
-        style: pickerValues[1],        // formerly 'name'
+        type: pickerValues[0],
+        style: pickerValues[1],
         color: pickerValues[2],
         texture: pickerValues[3],
         formality: pickerValues[5],
         size: pickerValues[6],
-        favorite: pickerValues[8] === "Yes", // convert to boolean
-        season: selectedSeason,              // keep as array
+        favorite: pickerValues[8] === "Yes",
+        season: selectedSeason,
       };
-      
-  
+
       console.log("📡 Uploading item:", itemData);
-      await savePhotoUrl(itemData);  // Update function signature below
-  
+      await savePhotoUrl(itemData);
       Alert.alert("Success", "Image uploaded and saved to MongoDB!");
+
       setSelectedImage(null);
       setPickerValues(Array(9).fill(""));
       setSelectedSeason([]);
@@ -116,7 +126,6 @@ const PhotoUpload = () => {
       setIsUploading(false);
     }
   };
-  
 
   return (
     <View style={globalStyles.container}>
@@ -135,159 +144,170 @@ const PhotoUpload = () => {
       {selectedImage && !isUploading && (
         <>
           <Image source={{ uri: selectedImage }} style={globalStyles.imagePreview} />
-          
 
-          <View style={styles.multiSelectContainer}>
-            <View style={styles.seasonOptions}>
-            {["Summer", "Fall", "Winter", "Spring"].map(season => (
-              <View key={season} style={styles.seasonShadowWrapper}>
-                <View style={styles.dropShadowSmall} />
-                <Text
-                  style={[
-                    styles.seasonOption,
-                    selectedSeason.includes(season) && styles.seasonSelected,
-                  ]}
-                  onPress={() => toggleSeason(season)}
-                >
-                  {season}
+          {step === "color" ? (
+            <>
+              <View style={{ alignItems: "center", marginTop: 30 }}>
+                <Text style={{ color: "#DDD", fontSize: 16, fontWeight: "bold", marginBottom: 12 }}>
+                  Pick a Color
                 </Text>
-              </View>
-            ))}
-            </View>
-          </View>
-
-          <View style={{ alignItems: "center" }}>
-            <View style={styles.dropShadow}/>         
-              <View style={styles.centeredPickerContainer}>
-                  <Text style={styles.pickerLabel}>Favorite:</Text>
-                  <View style={styles.pickerWrapper}>
-                    <Picker
-                      selectedValue={pickerValues[8]}
-                      style={styles.picker}
-                      onValueChange={(value) => updatePickerValue(8, value)}
-                      dropdownIconColor="#DDD"
-                      mode="dropdown"
-                    >
-                      {["Yes", "No"].map(opt => (
-                        <Picker.Item label={opt} value={opt} key={opt} style={styles.pickerItem}/>
-                      ))}
-                    </Picker>
-                  </View>
-              </View>
-            </View>
-
-          <View style={styles.dropdownGrid}>
-            {/* Left column */}
-            <View style={styles.dropdownColumn}>
-              {[
-                {
-                  label: "Type",
-                  options: Object.keys(styleOptionsMap),
-                  onChange: (value: string) => {
-                    setSelectedType(value);
-                    updatePickerValue(0, value);
-                  },
-                  selected: selectedType,
-                },
-                {
-                  label: "Style",
-                  options: styleOptionsMap[selectedType],
-                  onChange: (value: string) => updatePickerValue(1, value),
-                  selected: pickerValues[1],
-                },
-                {
-                  label: "Size",
-                  options: ["XS", "S", "M", "L", "XL"],
-                  onChange: (value: string) => updatePickerValue(6, value),
-                  selected: pickerValues[6],
-                },
-              ].map((dropdown, index) => (
-                <View key={index} style={{ alignItems: "center" }}>
-                  {/* Drop shadow below the picker row */}
-                  <View style={styles.dropShadow} />
-
-                  {/* Picker row */}
-                  <View style={styles.centeredPickerContainer}>
-                    <View style={{flexDirection: "column"}}>
-                      <Text style={styles.pickerLabel}>{dropdown.label}:</Text>
-                      <View style={styles.pickerWrapper}>
-                    </View>
-                    <View style={{flexDirection: "row"}}>
-                      <Picker
-                        selectedValue={dropdown.selected}
-                        style={styles.picker}
-                        onValueChange={dropdown.onChange}
-                        dropdownIconColor="#DDD"
-                        mode="dropdown"
-                      >
-                        {dropdown.options.map(opt => (
-                          <Picker.Item label={opt} value={opt} key={opt} style={styles.pickerItem}/>
-                        ))}
-                      </Picker>
-                    </View>
-                  </View>
-                  </View>
+                <View style={{ height: 250, width: 250 }}>
+                <ColorPicker
+                  color={selectedHexColor}
+                  onColorChange={setSelectedHexColor}
+                  thumbSize={30}
+                  sliderSize={30}
+                  noSnap={true}
+                  row={false}
+                  swatches={true}
+                  swatchesLast={true}
+                  discrete={false} // use smooth slider
+                  autoResetSlider={false} // keep current lightness when moving on wheel
+                  shadeWheelThumb={true} // show thumb color on the wheel
+                  shadeSliderThumb={true} // show thumb color on the slider
+                  useNativeDriver={true} // for better performance
+                  palette={[
+                    "#fdf6e3",
+                    "#f5e8d0",
+                    "#e9d5b8",
+                    "#d4bda0",
+                    "#c1a78c",
+                    "#a98977",
+                    "#92735e",
+                    "#7c5c45",
+                  ]}
+                />
                 </View>
-              ))}
-            </View>
-
-            {/* Right column */}
-            <View style={styles.dropdownColumn}>
-              {[
-                {
-                  label: "Color",
-                  options: ["Black", "White", "Gray", "Navy", "Red", "Green", "Beige", "Yellow"],
-                  onChange: (value: string) => updatePickerValue(2, value),
-                  selected: pickerValues[2],
-                },
-                {
-                  label: "Texture",
-                  options: ["Cotton", "Denim", "Wool", "Linen", "Fleece", "Leather", "Suede"],
-                  onChange: (value: string) => updatePickerValue(3, value),
-                  selected: pickerValues[3],
-                },
-                {
-                  label: "Formality",
-                  options: ["Casual", "Business Casual", "Formal"],
-                  onChange: (value: string) => updatePickerValue(5, value),
-                  selected: pickerValues[5],
-                },
-              ].map((dropdown, index) => (
-                <View key={index} style={{ alignItems: "center" }}>
-                  {/* Drop shadow below the picker row */}
-                  <View style={styles.dropShadow} />
-
-                  {/* Picker row */}
-                  <View style={styles.centeredPickerContainer}>
-                    <View style={{flexDirection: "column"}}>
-                      <Text style={styles.pickerLabel}>{dropdown.label}:</Text>
-                      <View style={styles.pickerWrapper}>
-                    </View>
-                    <View style={{flexDirection: "row"}}>
-                      <Picker
-                        selectedValue={dropdown.selected}
-                        style={styles.picker}
-                        onValueChange={dropdown.onChange}
-                        dropdownIconColor="#DDD"
-                        mode="dropdown"
+              </View>
+              
+              <View style={{ marginTop: 30 }}>
+                <GradientButton
+                  title="Next"
+                  onPress={() => {
+                    updatePickerValue(2, selectedHexColor);
+                    setStep("tags");
+                  }}
+                  size="medium"
+                />
+              </View>
+            </>
+          ) : (
+            <>
+              <View style={styles.multiSelectContainer}>
+                <View style={styles.seasonOptions}>
+                  {["Summer", "Fall", "Winter", "Spring"].map(season => (
+                    <View key={season} style={styles.seasonShadowWrapper}>
+                      <View style={styles.dropShadowSmall} />
+                      <Text
+                        style={[
+                          styles.seasonOption,
+                          selectedSeason.includes(season) && styles.seasonSelected,
+                        ]}
+                        onPress={() => toggleSeason(season)}
                       >
-                        {dropdown.options.map(opt => (
-                          <Picker.Item label={opt} value={opt} key={opt} style={styles.pickerItem}/>
-                        ))}
-                      </Picker>
+                        {season}
+                      </Text>
                     </View>
-                  </View>
-                  
-                  </View>
+                  ))}
                 </View>
-              ))}
-            </View>
-          </View>
-          <View style={{ marginTop: 20 }}>
-            <GradientButton title="Upload" onPress={handleUpload} size="medium" />
-          </View>
-          
-          
+              </View>
+
+              <View style={styles.dropdownGrid}>
+                <View style={styles.dropdownColumn}>
+                  {/* Type, Style, Size */}
+                  {[{
+                    label: "Type",
+                    options: Object.keys(styleOptionsMap),
+                    onChange: (value: string) => {
+                      setSelectedType(value);
+                      updatePickerValue(0, value);
+                    },
+                    selected: selectedType,
+                  }, {
+                    label: "Style",
+                    options: styleOptionsMap[selectedType],
+                    onChange: (value: string) => updatePickerValue(1, value),
+                    selected: pickerValues[1],
+                  }, {
+                    label: "Size",
+                    options: ["XS", "S", "M", "L", "XL"],
+                    onChange: (value: string) => updatePickerValue(6, value),
+                    selected: pickerValues[6],
+                  }].map((dropdown, index) => (
+                    <View key={index} style={{ alignItems: "center" }}>
+                      <View style={styles.dropShadow} />
+                      <View style={styles.centeredPickerContainer}>
+                        <View style={{ flexDirection: "column" }}>
+                          <Text style={styles.pickerLabel}>{dropdown.label}:</Text>
+                          <View style={styles.pickerWrapper}></View>
+                          <View style={{ flexDirection: "row" }}>
+                            <Picker
+                              selectedValue={dropdown.selected}
+                              style={styles.picker}
+                              onValueChange={dropdown.onChange}
+                              dropdownIconColor="#DDD"
+                              mode="dropdown"
+                            >
+                              {dropdown.options.map(opt => (
+                                <Picker.Item label={opt} value={opt} key={opt} style={styles.pickerItem} />
+                              ))}
+                            </Picker>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+
+                <View style={styles.dropdownColumn}>
+                  {/* Texture, Formality, Favorite */}
+                  {[{
+                    label: "Texture",
+                    options: ["Cotton", "Denim", "Wool", "Linen", "Fleece", "Leather", "Suede"],
+                    onChange: (value: string) => updatePickerValue(3, value),
+                    selected: pickerValues[3],
+                  }, {
+                    label: "Formality",
+                    options: ["Casual", "Business Casual", "Formal"],
+                    onChange: (value: string) => updatePickerValue(5, value),
+                    selected: pickerValues[5],
+                  }, {
+                    label: "Favorite",
+                    options: ["Yes", "No"],
+                    onChange: (value: string) => updatePickerValue(8, value),
+                    selected: pickerValues[8],
+                  }].map((dropdown, index) => (
+                    <View key={index} style={{ alignItems: "center" }}>
+                      <View style={styles.dropShadow} />
+                      <View style={styles.centeredPickerContainer}>
+                        <View style={{ flexDirection: "column" }}>
+                          <Text style={styles.pickerLabel}>{dropdown.label}:</Text>
+                          <View style={styles.pickerWrapper}></View>
+                          <View style={{ flexDirection: "row" }}>
+                            <Picker
+                              selectedValue={dropdown.selected}
+                              style={styles.picker}
+                              onValueChange={dropdown.onChange}
+                              dropdownIconColor="#DDD"
+                              mode="dropdown"
+                            >
+                              {dropdown.options.map(opt => (
+                                <Picker.Item label={opt} value={opt} key={opt} style={styles.pickerItem} />
+                              ))}
+                            </Picker>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              </View>
+
+              <View style={{ marginTop: 20 }}>
+                <GradientButton title="Upload" onPress={handleUpload} size="medium" />
+              </View>
+            </>
+          )}
         </>
       )}
     </View>

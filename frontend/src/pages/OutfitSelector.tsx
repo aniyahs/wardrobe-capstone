@@ -78,10 +78,8 @@ const OutfitGeneratorScreen = () => {
   return (
     <View style={styles.mainContainer}>
       <StyledText size={24} variant="title">Outfit Generator</StyledText>
-      {/*}
       <Weather onWeatherFetched={(w) => setWeather(w)} />
-      We got rate limited from too many requests
-      */}
+      
       <View style={{ alignItems: "center", marginBottom: 0 }}>
         {/* Drop shadow layer */}
         <View style={styles.dropShadow} />
