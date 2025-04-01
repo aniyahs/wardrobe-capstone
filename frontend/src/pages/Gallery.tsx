@@ -1,66 +1,169 @@
-import React from "react";
-import { View, Image, FlatList, ScrollView, Dimensions } from "react-native";
+import React, { useEffect, useState } from "react";
+import {
+  View,
+  Image,
+  FlatList,
+  Text,
+  ActivityIndicator,
+  Dimensions,
+  Modal,
+  SafeAreaView,
+  TouchableOpacity,
+  ScrollView,
+} from "react-native";
 import { globalStyles } from "../styles/styles";
 import { useClothing } from "../components/ClothingContext";
-
-const images = [
-  "https://cdn.mos.cms.futurecdn.net/whowhatwear/posts/285445/big-collar-shirts-285445-1581368086628-square-1200-80.jpg",
-  "https://cdn01.pinkoi.com/product/bTeswVJr/0/1/640x530.jpg",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJEI47nE_NPeFITydr8cCp0v1iLGHUwrmXjg&s",
-  "https://images.asos-media.com/products/asos-design-skinny-poplin-shirt-with-square-collar-in-brown/206529655-1-brown?$n_640w$&wid=513&fit=constrain",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCFRuvCE2fQENdON4uLkaa0T26XOloxe_tTw&s",
-  "https://cdn11.bigcommerce.com/s-x7bzlb8042/images/stencil/2560w/products/8382/22135/ladies-banded-collar-shirt-306__69624.1641601660.jpg?c=1",
-  "https://www.paulfredrick.com/cdn/shop/files/TabCollar_969ee738-fca7-42c8-8146-6beec8e89706.webp?v=1720187406&width=1024",
-  "https://i.etsystatic.com/42063793/r/il/e83332/4758186778/il_fullxfull.4758186778_jgr0.jpg",
-  "https://vercini.com/cdn/shop/files/red-shirt-with-black-squares-7_0000_Layer0copy2.jpg?v=1709766258",
-  "https://cdn.mos.cms.futurecdn.net/whowhatwear/posts/285445/big-collar-shirts-285445-1581368086628-square-1200-80.jpg",
-  "https://cdn01.pinkoi.com/product/bTeswVJr/0/1/640x530.jpg",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJEI47nE_NPeFITydr8cCp0v1iLGHUwrmXjg&s",
-  "https://images.asos-media.com/products/asos-design-skinny-poplin-shirt-with-square-collar-in-brown/206529655-1-brown?$n_640w$&wid=513&fit=constrain",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCFRuvCE2fQENdON4uLkaa0T26XOloxe_tTw&s",
-  "https://cdn11.bigcommerce.com/s-x7bzlb8042/images/stencil/2560w/products/8382/22135/ladies-banded-collar-shirt-306__69624.1641601660.jpg?c=1",
-  "https://www.paulfredrick.com/cdn/shop/files/TabCollar_969ee738-fca7-42c8-8146-6beec8e89706.webp?v=1720187406&width=1024",
-  "https://i.etsystatic.com/42063793/r/il/e83332/4758186778/il_fullxfull.4758186778_jgr0.jpg",
-  "https://vercini.com/cdn/shop/files/red-shirt-with-black-squares-7_0000_Layer0copy2.jpg?v=1709766258",
-  "https://cdn.mos.cms.futurecdn.net/whowhatwear/posts/285445/big-collar-shirts-285445-1581368086628-square-1200-80.jpg",
-  "https://cdn01.pinkoi.com/product/bTeswVJr/0/1/640x530.jpg",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJEI47nE_NPeFITydr8cCp0v1iLGHUwrmXjg&s",
-  "https://images.asos-media.com/products/asos-design-skinny-poplin-shirt-with-square-collar-in-brown/206529655-1-brown?$n_640w$&wid=513&fit=constrain",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCFRuvCE2fQENdON4uLkaa0T26XOloxe_tTw&s",
-  "https://cdn11.bigcommerce.com/s-x7bzlb8042/images/stencil/2560w/products/8382/22135/ladies-banded-collar-shirt-306__69624.1641601660.jpg?c=1",
-  "https://www.paulfredrick.com/cdn/shop/files/TabCollar_969ee738-fca7-42c8-8146-6beec8e89706.webp?v=1720187406&width=1024",
-  "https://i.etsystatic.com/42063793/r/il/e83332/4758186778/il_fullxfull.4758186778_jgr0.jpg",
-  "https://vercini.com/cdn/shop/files/red-shirt-with-black-squares-7_0000_Layer0copy2.jpg?v=1709766258",
-  "https://cdn.mos.cms.futurecdn.net/whowhatwear/posts/285445/big-collar-shirts-285445-1581368086628-square-1200-80.jpg",
-  "https://cdn01.pinkoi.com/product/bTeswVJr/0/1/640x530.jpg",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRJEI47nE_NPeFITydr8cCp0v1iLGHUwrmXjg&s",
-  "https://images.asos-media.com/products/asos-design-skinny-poplin-shirt-with-square-collar-in-brown/206529655-1-brown?$n_640w$&wid=513&fit=constrain",
-  "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQCFRuvCE2fQENdON4uLkaa0T26XOloxe_tTw&s",
-  "https://cdn11.bigcommerce.com/s-x7bzlb8042/images/stencil/2560w/products/8382/22135/ladies-banded-collar-shirt-306__69624.1641601660.jpg?c=1",
-  "https://www.paulfredrick.com/cdn/shop/files/TabCollar_969ee738-fca7-42c8-8146-6beec8e89706.webp?v=1720187406&width=1024",
-  "https://i.etsystatic.com/42063793/r/il/e83332/4758186778/il_fullxfull.4758186778_jgr0.jpg",
-  "https://vercini.com/cdn/shop/files/red-shirt-with-black-squares-7_0000_Layer0copy2.jpg?v=1709766258"
-];
+import type { ClothingItem } from "../components/ClothingContext";
 
 const screenWidth = Dimensions.get("window").width;
-const imageSize = screenWidth / 3 - 10; // Subtracting margin for spacing
+const imageSize = screenWidth / 3 - 10;
 
 const Gallery = () => {
-  const { clothingItems } = useClothing(); // Get clothing data from context
+  console.log("📸 Rendering Gallery component...");
+
+  const { clothingItems, loading, error, fetchClothingItems } = useClothing();
+  const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
+
+  useEffect(() => {
+    fetchClothingItems();
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={globalStyles.centered}>
+        <ActivityIndicator size="large" color="#000" />
+        <Text>Loading your wardrobe...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={globalStyles.centered}>
+        <Text style={{ color: "red" }}>Error fetching clothing items.</Text>
+      </View>
+    );
+  }
+
+  if (!clothingItems || clothingItems.length === 0) {
+    return (
+      <View style={globalStyles.centered}>
+        <Text>No clothing items found. Add some to your wardrobe!</Text>
+      </View>
+    );
+  }
 
   return (
-    <FlatList
-      data={clothingItems}
-      keyExtractor={(item) => item._id}
-      numColumns={3}
-      renderItem={({ item }) => (
-        <View style={{ margin: 5, width: imageSize, height: imageSize }}>
-          <Image source={{ uri: item.imageUrl }} style={globalStyles.image} />
-        </View>
-      )}
-      contentContainerStyle={globalStyles.container}
-      showsVerticalScrollIndicator={false}
-    />
+    <View style={{ flex: 1 }}>
+      <Modal
+        visible={selectedItem != null}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={() => setSelectedItem(null)}
+      >
+        <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
+          <ScrollView
+            style={{ flex: 1, width: "100%" }}
+            contentContainerStyle={{
+              flexGrow: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              padding: 20,
+            }}
+          >
+            {selectedItem && (
+              <>
+                <Image
+                  source={{ uri: selectedItem.imageUrl }}
+                  style={{
+                    width: "90%",
+                    height: 320,
+                    resizeMode: "cover",
+                    borderRadius: 12,
+                    marginBottom: 24,
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 2 },
+                    shadowOpacity: 0.3,
+                    shadowRadius: 4
+                  }}
+                />
+
+                <View
+                  style={{
+                    backgroundColor: "#fff",
+                    borderRadius: 12,
+                    paddingVertical: 16,
+                    paddingHorizontal: 20,
+                    width: "90%",
+                    shadowColor: "#000",
+                    shadowOffset: { width: 0, height: 1 },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 2,
+                    elevation: 3,
+                  }}
+                >
+                  {(() => {
+                    const builtTags: Record<string, string> = {
+                      type: selectedItem.type,
+                      style: selectedItem.style,
+                      color: selectedItem.color,
+                      texture: selectedItem.texture,
+                      formality: selectedItem.formality,
+                      size: selectedItem.size,
+                      ...(Array.isArray(selectedItem.season)
+                        ? { season: selectedItem.season.join(", ") }
+                        : { season: selectedItem.season || "" }),
+                    };
+
+                    return Object.entries(builtTags).map(([key, value]) => (
+                      <Text key={key} style={{ fontSize: 16, marginBottom: 6 }}>
+                        <Text style={{ fontWeight: "600", color: "#333" }}>{key}:</Text>{" "}
+                        <Text style={{ color: "#444" }}>{value}</Text>
+                      </Text>
+                    ));
+                  })()}
+                </View>
+
+                <Text
+                  onPress={() => setSelectedItem(null)}
+                  style={{
+                    color: "#ccc",
+                    fontSize: 16,
+                    marginTop: 30,
+                    textDecorationLine: "underline",
+                  }}
+                >
+                  Close
+                </Text>
+              </>
+            )}
+          </ScrollView>
+        </SafeAreaView>
+      </Modal>
+
+      <FlatList
+        data={clothingItems}
+        keyExtractor={(item) => item._id}
+        numColumns={3}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => setSelectedItem(item)}>
+            <View style={{ width: imageSize, height: imageSize, padding: 2 }}>
+              <Image
+                source={{ uri: item.imageUrl }}
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  resizeMode: "cover",
+                  borderRadius: 5,
+                }}
+              />
+            </View>
+          </TouchableOpacity>
+        )}
+        contentContainerStyle={{ alignItems: "flex-start", paddingVertical: 10 }}
+        showsVerticalScrollIndicator={false}
+      />
+    </View>
   );
 };
 

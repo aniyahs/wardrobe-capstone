@@ -71,3 +71,20 @@ def delete_wardrobe_item(item_id):
         return jsonify({"error": "Item not found or not authorized to delete"}), 404
 
     return jsonify({"message": "Item deleted successfully"}), 200
+
+# Get all wardrobe items for a user (or optionally everyone)
+@wardrobe_bp.route("/clothing", methods=["GET"])
+def get_all_wardrobe_items():
+    try:
+        items = wardrobe_collection.find()  # Optionally filter by user_id if needed
+        item_list = []
+        for item in items:
+            item["_id"] = str(item["_id"])
+            # Normalize image field from different keys
+            item["imageUrl"] = item.get("image_url") or item.get("photoUrl") or ""
+            item_list.append(item)
+        return jsonify(item_list), 200
+    except Exception as e:
+        print("Error fetching wardrobe items:", e)
+        return jsonify({"error": "Error fetching wardrobe items"}), 500
+

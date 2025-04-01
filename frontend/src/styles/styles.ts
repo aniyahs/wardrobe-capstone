@@ -3,6 +3,10 @@ import { Dimensions, StyleSheet } from "react-native";
 const { width, height } = Dimensions.get("window");
 
 export const globalStyles = StyleSheet.create({
+  centered: {  
+    justifyContent: "center",
+    alignItems: "center",
+  },
   // General container styling
   container: {
     flexGrow: 1,
