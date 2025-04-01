@@ -1,6 +1,7 @@
 import React from "react";
 import { Text, View, StyleSheet, Platform, Image, TouchableOpacity } from "react-native";
 import LinearGradient from "react-native-linear-gradient";
+import StyledText from "./StyledText";
 
 interface HeaderProps {
     setScreen: (screen: string) => void;
@@ -28,7 +29,7 @@ interface HeaderProps {
           <View style={styles.sideSpacer} />
 
           {/* Centered Title */}
-          <Text style={styles.headerText}>WearWell</Text>
+          <StyledText onPress={() => setScreen("Home")} size={34} variant="cursiveFont">WearWell</StyledText>
 
           {/* Right Side Placeholder for Image */}
           <View style={styles.imagePlaceholder}>

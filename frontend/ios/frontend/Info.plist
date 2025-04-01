@@ -49,8 +49,6 @@
 	<false/>
 	<key>UIAppFonts</key>
 	<array>
-		<string>Inter-Italic-VariableFont_opsz,wght.ttf</string>
-		<string>Inter.ttf</string>
 		<string>Inter_18pt-Black.ttf</string>
 		<string>Inter_18pt-BlackItalic.ttf</string>
 		<string>Inter_18pt-Bold.ttf</string>
@@ -105,6 +103,9 @@
 		<string>Inter_28pt-SemiBoldItalic.ttf</string>
 		<string>Inter_28pt-Thin.ttf</string>
 		<string>Inter_28pt-ThinItalic.ttf</string>
+		<string>Birthstone-Regular.ttf</string>
+		<string>Inter-1.ttf</string>
+		<string>Inter-Italics.ttf</string>
 	</array>
 </dict>
 </plist>
