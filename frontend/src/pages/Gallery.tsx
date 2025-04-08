@@ -14,8 +14,8 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { globalStyles } from "../styles/styles";
-import { useClothing, deleteClothingItem } from "../components/ClothingContext";
-import type { ClothingItem } from "../components/ClothingContext";
+import { useClothing, deleteClothingItem } from "../api/wardrobeService"
+import type { ClothingItem } from "../api/wardrobeService";
 
 
 const screenWidth = Dimensions.get("window").width;

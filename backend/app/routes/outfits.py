@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from .outfitGenerator import generate_outfit_cps, clothingTypes, wardrobeItems
+from .outfitGenerator import generate_outfit_cps, clothingTypes, defaultWardrobeItems
 
 # Create a blueprint for the outfit route
 outfit_bp = Blueprint('outfit_bp', __name__)
@@ -49,17 +49,23 @@ def map_outfit_to_slots(outfit_list):
 def generate_outfit():
     data = request.get_json()
     season = data.get('season', 'Spring')
+    if isinstance(season, str):
+        season = [season]
     formality = data.get('formality', 'Casual')
-    temperature = data.get("temperature")  
-    weathercode = data.get("weathercode") 
+    wardrobeItems = data.get('clothingItems') 
+    if not wardrobeItems or not isinstance(wardrobeItems, list):
+        return jsonify({"error": "Invalid clothing items"}), 400
+    temperature = data.get("temperature", 72)  
+    weathercode = data.get("weathercode", 1)
+    userId = data.get("userId") 
     # Ensure season is a list.
     if isinstance(season, str):
         season = [season]
     try:
-        outfit_list = generate_outfit_cps(season, formality, wardrobeItems, temperature,weathercode)
+        outfit_list = generate_outfit_cps(season, formality, wardrobeItems, temperature,weathercode, userId)
         if outfit_list is None:
             return jsonify({"error": "No valid outfit found"}), 400
         slots = map_outfit_to_slots(outfit_list)
-        return jsonify(slots)
+        return jsonify(outfit_list)
     except Exception as e:
         return jsonify({"error": str(e)}), 500

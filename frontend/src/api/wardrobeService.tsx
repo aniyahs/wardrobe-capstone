@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import { getCurrentUserId } from "../api/authService";
+import { getCurrentUserId } from "./authService";
 
 // Define the structure of a clothing item
 export interface ClothingItem {

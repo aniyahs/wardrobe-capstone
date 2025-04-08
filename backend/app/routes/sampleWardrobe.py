@@ -1,4 +1,4 @@
-wardrobeItems = [
+defaultWardrobeItems = [
     # **T-Shirts (Base Layer)**
     {
         "_id": "1",

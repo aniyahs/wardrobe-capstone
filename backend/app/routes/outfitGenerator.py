@@ -1,4 +1,4 @@
-from .sampleWardrobe import clothingTypes, wardrobeItems
+from .sampleWardrobe import clothingTypes, defaultWardrobeItems
 from itertools import product
 import random
 
@@ -107,18 +107,26 @@ def all_unique(*args):
 # Outfit Generator
 # -------------------------
 
-def generate_outfit_cps(season, formality, wardrobeItems, temperature=None, weathercode=None):
-    tops_candidates = [item for item in wardrobeItems if item['type'] in clothingTypes['tops']]
-    bottoms_candidates = [item for item in wardrobeItems if item['type'] in clothingTypes['bottoms']]
-    footwear_candidates = [item for item in wardrobeItems if item['type'] in clothingTypes['footwear']]
-    accessories_candidates = [item for item in wardrobeItems if item['type'] in clothingTypes['accessories']]
-    layering_candidates = [item for item in wardrobeItems if item['type'] in clothingTypes['tops'] or item['type'] in clothingTypes['outerwear']]
+def generate_outfit_cps(season, formality, wardrobeItems, temperature=None, weathercode=None, userId=None):
+    if wardrobeItems and wardrobeItems[0].get("_id") == "1":
+        print("Default")
+    # Do something
+
+    tops_candidates = [item for item in wardrobeItems if item['type'] == 'Tops']
+    bottoms_candidates = [item for item in wardrobeItems if item['type'] == 'Bottoms']
+    footwear_candidates = [item for item in wardrobeItems if item['type'] == 'Footwear']
+    accessories_candidates = [item for item in wardrobeItems if item['type'] == 'Accessories']
+    layering_candidates = [item for item in wardrobeItems if item['type'] in ['Tops', 'Outerwear']]
 
     layer1_candidates = [None] + layering_candidates
     layer2_candidates = [None] + layering_candidates
     accessory_candidates = [None] + accessories_candidates
 
     if not tops_candidates or not bottoms_candidates or not footwear_candidates:
+        print("Tops:", [item["style"] for item in tops_candidates])
+        print("Bottoms:", [item["style"] for item in bottoms_candidates])
+        print("Footwear:", [item["style"] for item in footwear_candidates])
+
         raise ValueError("Missing essential clothing items.")
 
     variables = ['top', 'layer1', 'layer2', 'bottom', 'footwear', 'accessory']
@@ -229,7 +237,14 @@ def generate_outfit_cps(season, formality, wardrobeItems, temperature=None, weat
         final_outfit = outfit_from_assignment(best_solution)
         print(f"Closest outfit found with penalty {best_penalty}")
         for item in final_outfit:
-            print(f"Type: {item['type']}, Color: {item['color']}, Formality: {item['formality']}, Season: {item['season']}")
+            if item is not None:
+                print("Outfit item:")
+                for key, value in item.items():
+                    print(f"  {key}: {value}")
+                print("-" * 30)  # Separator between items
+            else:
+                print("None")
+        
         return final_outfit
     else:
         print("No outfit found.")

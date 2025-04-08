@@ -13,7 +13,7 @@ import Weather from "./src/components/Weather";
 import Background from "./src/components/Background";
 import StyledText from "./src/components/StyledText";
 import { globalStyles } from "./src/styles/styles";
-import { ClothingProvider } from "./src/components/ClothingContext";
+import { ClothingProvider } from "./src/api/wardrobeService";
 
 interface AppProps {
   setScreen: (screen: string) => void;

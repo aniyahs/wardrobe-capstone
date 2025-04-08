@@ -1,90 +1,101 @@
-// src/components/OutfitSelector.tsx
 import React, { useState } from 'react';
-import { View, Text, Button, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, ActivityIndicator, Image, StyleSheet, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import StyledText from "../components/StyledText";
 import GradientButton from "../components/GradientButton";
 import Weather from "../components/Weather";
+import { getCurrentUserId } from "../api/authService";
+import { useClothing } from "../api/wardrobeService";
 
 interface WardrobeItem {
+  _id?: string;
+  imageUrl: string;
   type: string;
   color: string;
+  style?: string;
+  favorite?: boolean;
+  formality: string;
+  season: string[];
+  photoUrl?: string;
+  size?: string;
+  texture?: string;
+  userId?: string;
 }
-
-interface Outfit {
-  top?: WardrobeItem;
-  layer1?: WardrobeItem;
-  layer2?: WardrobeItem;
-  bottom?: WardrobeItem;
-  footwear?: WardrobeItem;
-  accessory?: WardrobeItem;
-}
-
-function getContrastColor(hexColor: string): string {
-  const cleaned = hexColor.replace('#', '');
-  const numericColor = parseInt(cleaned, 16);
-  return numericColor <= 0x505050 ? '#FFFFFF' : '#000000';
-}
-
-const renderSquare = (item?: WardrobeItem) => {
-  if (!item || !item.type || !item.type.trim()) return null;
-  const contrastColor = getContrastColor(item.color);
-  return (
-    <View style={[styles.square, { backgroundColor: item.color }]}> 
-      <Text style={[styles.squareText, { color: contrastColor }]}>{item.type}</Text>
-    </View>
-  );
-};
-
-const renderRow = (items: (WardrobeItem | undefined)[]) => {
-  const validItems = items.filter(item => item && item.type && item.type.trim());
-  if (validItems.length === 0) return null;
-  return (
-    <View style={styles.row}>
-      {validItems.map((item, index) => (
-        <View key={index}>{renderSquare(item)}</View>
-      ))}
-    </View>
-  );
-};
 
 const OutfitGeneratorScreen = () => {
+  // Changed outfit state to be an array of WardrobeItem
   const [season, setSeason] = useState('Summer');
   const [formality, setFormality] = useState('Casual');
-  const [outfit, setOutfit] = useState<Outfit | null>(null);
+  const [outfit, setOutfit] = useState<WardrobeItem[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [weather, setWeather] = useState<{ temperature: number; weathercode: number } | null>(null);
+  const { clothingItems, fetchClothingItems } = useClothing();
 
-  const generateOutfit = () => {
+  const generateOutfit = async () => {
     setLoading(true);
-    axios.post('http://10.0.2.2:5001/outfit/generate-outfit', {
-      season,
-      formality,
-      temperature: weather?.temperature,
-      weathercode: weather?.weathercode,
-      user_id: 'mock-user-id' // Replace with real user ID
-    })
-    .then(response => {
-      setOutfit(response.data);
+    try {
+      const userId = await getCurrentUserId();
+      if (!userId) throw new Error("User not logged in");
+
+      if (!clothingItems || clothingItems.length === 0) {
+        await fetchClothingItems(); // Fetch again if not loaded
+      }
+
+      axios
+        .post('http://10.0.2.2:5001/outfit/generate-outfit', {
+          season,
+          formality,
+          clothingItems, // this is from context
+          temperature: weather?.temperature,
+          weathercode: weather?.weathercode,
+          userId,
+        })
+        .then(response => {
+          // The backend returns an array of wardrobe items
+          setOutfit(response.data);
+        })
+        .catch(error => {
+          console.error('Error generating outfit:', error);
+        })
+        .finally(() => setLoading(false));
+    } catch (error) {
+      console.error("Error fetching clothing items:", error);
       setLoading(false);
-    })
-    .catch(error => {
-      console.error('Error generating outfit:', error);
-      setLoading(false);
-    });
+    }
+  };
+
+  // New helper function to render an outfit item with additional properties.
+  const renderOutfitItem = (item: WardrobeItem) => {
+    if (!item || !item.imageUrl) return null;
+
+    return (
+      <View style={styles.outfitItem}>
+        <Image
+          source={{ uri: item.imageUrl }}
+          style={styles.image}
+          resizeMode="cover"
+        />
+        <View style={styles.itemInfo}>
+          <Text style={styles.itemText}>Type: {item.type}</Text>
+          {item.style && <Text style={styles.itemText}>Style: {item.style}</Text>}
+          <Text style={styles.itemText}>Color: {item.color}</Text>
+          <Text style={styles.itemText}>Formality: {item.formality}</Text>
+          <Text style={styles.itemText}>Season: {item.season.join(', ')}</Text>
+          {item.size && <Text style={styles.itemText}>Size: {item.size}</Text>}
+          {item.texture && <Text style={styles.itemText}>Texture: {item.texture}</Text>}
+        </View>
+      </View>
+    );
   };
 
   return (
-    <View style={styles.mainContainer}>
+    <ScrollView contentContainerStyle={styles.mainContainer}>
       <StyledText size={24} variant="title">Outfit Generator</StyledText>
       <Weather onWeatherFetched={(w) => setWeather(w)} />
-      
-      <View style={{ alignItems: "center", marginBottom: 0 }}>
-        {/* Drop shadow layer */}
-        <View style={styles.dropShadow} />
 
-        {/* Picker with label */}
+      <View style={{ alignItems: "center", marginBottom: 10 }}>
+        <View style={styles.dropShadow} />
         <View style={styles.pickerContainer}>
           <StyledText size={18} variant="subtitle" style={styles.pickerLabel}>Season:</StyledText>
           <View style={styles.pickerWrapper}>
@@ -105,18 +116,15 @@ const OutfitGeneratorScreen = () => {
         </View>
       </View>
 
-      <View style={{ alignItems: "center", marginBottom: 0 }}>
-        {/* Drop shadow layer */}
+      <View style={{ alignItems: "center", marginBottom: 10 }}>
         <View style={styles.dropShadow} />
-
-        {/* Picker with label */}
         <View style={styles.pickerContainer}>
-        <StyledText size={18} variant="subtitle" style={styles.pickerLabel}>Formality:</StyledText>
+          <StyledText size={18} variant="subtitle" style={styles.pickerLabel}>Formality:</StyledText>
           <View style={styles.pickerWrapper}>
             <Picker
-              selectedValue={season}
+              selectedValue={formality}
               style={styles.picker}
-              onValueChange={setSeason}
+              onValueChange={setFormality}
               dropdownIconColor="#DDD"
               mode="dropdown"
               itemStyle={styles.pickerItem}
@@ -130,8 +138,7 @@ const OutfitGeneratorScreen = () => {
         </View>
       </View>
 
-
-      <View style={{ width: "100%", alignItems: "center", justifyContent: "center" }}>
+      <View style={{ width: "100%", alignItems: "center", marginVertical: 10 }}>
         <GradientButton title="Generate Outfit" onPress={generateOutfit} size="medium" style={{ alignSelf: "center" }}/>
       </View>
 
@@ -139,13 +146,14 @@ const OutfitGeneratorScreen = () => {
 
       {outfit && (
         <View style={styles.outfitContainer}>
-          {renderRow([outfit.top, outfit.layer1, outfit.layer2])}
-          {renderRow([outfit.bottom])}
-          {renderRow([outfit.footwear])}
-          {renderRow([outfit.accessory])}
+          {outfit.map((item, index) => (
+            <View key={index}>
+              {renderOutfitItem(item)}
+            </View>
+          ))}
         </View>
       )}
-    </View>
+    </ScrollView>
   );
 };
 
@@ -156,18 +164,18 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "flex-start",
     marginHorizontal: "10%",
+    paddingVertical: 20,
   },
   dropShadow: {
     position: "absolute",
     bottom: 6,
-    width: "80%", // match pickerContainer width
+    width: "80%",
     height: 10,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
     zIndex: -1,
   },
-  
   pickerContainer: {
     flexDirection: "row",
     alignItems: "center",
@@ -197,29 +205,35 @@ const styles = StyleSheet.create({
     textShadowRadius: 5,
     backgroundColor: "#3F342E",
   },
-  pickerDropdown: {
-    backgroundColor: "#3F342E",
-    borderRadius: 10,
-    overflow: "hidden",
-  },
   loader: { marginVertical: 16 },
-  outfitContainer: { marginTop: 32 },
-  row: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 16,
+  outfitContainer: {
+    marginTop: 32,
+    width: "100%",
   },
-  square: {
+  outfitItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 20,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 10,
+    padding: 10,
+  },
+  image: {
     width: 100,
     height: 100,
-    marginHorizontal: 8,
+    borderRadius: 10,
     borderWidth: 1,
-    borderColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderColor: '#ccc',
   },
-  squareText: { fontWeight: 'bold' },
+  itemInfo: {
+    marginLeft: 10,
+    flexShrink: 1,
+  },
+  itemText: {
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
 });
 
 export default OutfitGeneratorScreen;
