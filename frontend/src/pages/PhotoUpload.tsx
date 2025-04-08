@@ -15,10 +15,13 @@ import { getCurrentUserId } from "../api/authService";
 import GradientButton from "../components/GradientButton";
 import { Picker } from "@react-native-picker/picker";
 import  ColorPicker  from "react-native-wheel-color-picker";
+import { predictTags } from "@/api/predictService";
+
 
 const PhotoUpload = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [isPredicting, setIsPredicting] = useState<boolean>(false);
   const [pickerValues, setPickerValues] = useState<string[]>(Array(9).fill(""));
   const [selectedHexColor, setSelectedHexColor] = useState<string>("#000000");
   const [step, setStep] = useState<"color" | "tags">("color");
@@ -96,6 +99,16 @@ const PhotoUpload = () => {
       const userId = await getCurrentUserId();
 
       if (!userId) throw new Error("User not logged in");
+
+      // for predicting the tags
+      setIsPredicting(true);
+      const predictedTags = await predictTags(downloadUrl);
+      console.log('🎯 Predicted tags:', predictedTags);
+      setIsPredicting(false);
+
+      updatePickerValue(0, predictedTags.type || "Tops");    
+      updatePickerValue(2, predictedTags.color || "#000000"); 
+      updatePickerValue(3, predictedTags.pattern || "Solid");
 
       const itemData = {
         userId,
