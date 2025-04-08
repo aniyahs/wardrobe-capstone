@@ -78,3 +78,20 @@ export const useClothing = () => {
   }
   return context;
 };
+
+export const deleteClothingItem = async (itemId: string) => {
+  try {
+    const response = await fetch(`http://10.0.2.2:5001/wardrobe/delete/${itemId}`, {
+      method: "DELETE",
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to delete item.");
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error deleting item:", error);
+    throw error;
+  }
+};

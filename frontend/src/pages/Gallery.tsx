@@ -14,8 +14,9 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { globalStyles } from "../styles/styles";
-import { useClothing } from "../components/ClothingContext";
+import { useClothing, deleteClothingItem } from "../components/ClothingContext";
 import type { ClothingItem } from "../components/ClothingContext";
+
 
 const screenWidth = Dimensions.get("window").width;
 const imageSize = screenWidth / 3 - 10;
@@ -141,130 +142,153 @@ const Gallery = () => {
         <ActivityIndicator size="large" color="#5EB0E5" />
       </View>
     );
-  }
-  return (
-    <View style={{ flex: 1 }}>
-      <FlatList
-        data={filteredItems}
-        keyExtractor={(item) => item._id}
-        numColumns={3}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => setSelectedItem(item)}>
-            <View style={{ width: imageSize, height: imageSize, padding: 2 }}>
-              <Image
-                source={{ uri: item.imageUrl }}
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  resizeMode: "cover",
-                  borderRadius: 5,
-                  backgroundColor: "#eee",
-                }}
-              />
-            </View>
-          </TouchableOpacity>
-        )}
-        ListHeaderComponent={
-          <View style={{ marginTop: 50, marginBottom: 10 }}>
-            <Pressable
-              onPress={() => setFilterVisible((prev) => !prev)}
-              style={{ padding: 12, backgroundColor: "#ccc", alignItems: "center" }}
-            >
-              <Text style={{ fontWeight: "bold" }}>Toggle Filters</Text>
-            </Pressable>
-            {filterVisible && renderFilterSection()}
-          </View>
-        }
-        contentContainerStyle={{ paddingTop: 10, paddingBottom: 20, paddingHorizontal: 5 }}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-        nestedScrollEnabled={true}
-      />
-
-      <Modal
-        visible={selectedItem != null}
-        animationType="slide"
-        transparent={false}
-        onRequestClose={() => setSelectedItem(null)}
-      >
-        <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
-          <ScrollView
-            style={{ flex: 1, width: "100%" }}
-            contentContainerStyle={{
-              flexGrow: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              padding: 20,
-            }}
-          >
-            {selectedItem && (
-              <>
+  } else {
+    return (
+      <View style={{ flex: 1 }}>
+        <FlatList
+          data={filteredItems}
+          keyExtractor={(item) => item._id}
+          numColumns={3}
+          renderItem={({ item }) => (
+            <TouchableOpacity onPress={() => setSelectedItem(item)}>
+              <View style={{ width: imageSize, height: imageSize, padding: 2 }}>
                 <Image
-                  source={{ uri: selectedItem.imageUrl }}
+                  source={{ uri: item.imageUrl }}
                   style={{
-                    width: "90%",
-                    height: 320,
+                    width: "100%",
+                    height: "100%",
                     resizeMode: "cover",
-                    borderRadius: 12,
-                    marginBottom: 24,
-                    backgroundColor: "#ccc",
+                    borderRadius: 5,
+                    backgroundColor: "#eee",
                   }}
                 />
+              </View>
+            </TouchableOpacity>
+          )}
+          ListHeaderComponent={
+            <View style={{ marginTop: 50, marginBottom: 10 }}>
+              <Pressable
+                onPress={() => setFilterVisible((prev) => !prev)}
+                style={{ padding: 12, backgroundColor: "#ccc", alignItems: "center" }}
+              >
+                <Text style={{ fontWeight: "bold" }}>Toggle Filters</Text>
+              </Pressable>
+              {filterVisible && renderFilterSection()}
+            </View>
+          }
+          contentContainerStyle={{ paddingTop: 10, paddingBottom: 20, paddingHorizontal: 5 }}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          nestedScrollEnabled={true}
+        />
 
-                <View
-                  style={{
-                    backgroundColor: "#fff",
-                    borderRadius: 12,
-                    paddingVertical: 16,
-                    paddingHorizontal: 20,
-                    width: "90%",
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 2,
-                    elevation: 3,
-                  }}
-                >
-                  {(() => {
-                    const builtTags: Record<string, string> = {
-                      type: selectedItem.type,
-                      style: selectedItem.style,
-                      color: selectedItem.color,
-                      texture: selectedItem.texture,
-                      formality: selectedItem.formality,
-                      size: selectedItem.size,
-                      ...(Array.isArray(selectedItem.season)
-                        ? { season: selectedItem.season.join(", ") }
-                        : { season: selectedItem.season || "" }),
-                    };
+        <Modal
+          visible={selectedItem != null}
+          animationType="slide"
+          transparent={false}
+          onRequestClose={() => setSelectedItem(null)}
+        >
+          <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
+            <ScrollView
+              style={{ flex: 1, width: "100%" }}
+              contentContainerStyle={{
+                flexGrow: 1,
+                justifyContent: "center",
+                alignItems: "center",
+                padding: 20,
+              }}
+            >
+              {selectedItem && (
+                <>
+                  <Image
+                    source={{ uri: selectedItem.imageUrl }}
+                    style={{
+                      width: "90%",
+                      height: 320,
+                      resizeMode: "cover",
+                      borderRadius: 12,
+                      marginBottom: 24,
+                      backgroundColor: "#ccc",
+                    }}
+                  />
 
-                    return Object.entries(builtTags).map(([key, value]) => (
-                      <Text key={key} style={{ fontSize: 16, marginBottom: 6 }}>
-                        <Text style={{ fontWeight: "600", color: "#333" }}>{key}:</Text>{" "}
-                        <Text style={{ color: "#444" }}>{value}</Text>
-                      </Text>
-                    ));
-                  })()}
-                </View>
+                  <View
+                    style={{
+                      backgroundColor: "#fff",
+                      borderRadius: 12,
+                      paddingVertical: 16,
+                      paddingHorizontal: 20,
+                      width: "90%",
+                      shadowColor: "#000",
+                      shadowOffset: { width: 0, height: 1 },
+                      shadowOpacity: 0.1,
+                      shadowRadius: 2,
+                      elevation: 3,
+                    }}
+                  >
+                    {(() => {
+                      const builtTags: Record<string, string> = {
+                        type: selectedItem.type,
+                        style: selectedItem.style,
+                        color: selectedItem.color,
+                        texture: selectedItem.texture,
+                        formality: selectedItem.formality,
+                        size: selectedItem.size,
+                        ...(Array.isArray(selectedItem.season)
+                          ? { season: selectedItem.season.join(", ") }
+                          : { season: selectedItem.season || "" }),
+                      };
 
-                <Text
-                  onPress={() => setSelectedItem(null)}
-                  style={{
-                    color: "#ccc",
-                    fontSize: 16,
-                    marginTop: 30,
-                    textDecorationLine: "underline",
-                  }}
-                >
-                  Close
-                </Text>
-              </>
-            )}
-          </ScrollView>
-        </SafeAreaView>
-      </Modal>
-    </View>
-  );
-};
+                      return Object.entries(builtTags).map(([key, value]) => (
+                        <Text key={key} style={{ fontSize: 16, marginBottom: 6 }}>
+                          <Text style={{ fontWeight: "600", color: "#333" }}>{key}:</Text>{" "}
+                          <Text style={{ color: "#444" }}>{value}</Text>
+                        </Text>
+                      ));
+                    })()}
+                  </View>
+                  
+                  <TouchableOpacity
+                    onPress={async () => {
+                      try {
+                        await deleteClothingItem(selectedItem._id);
+                        setSelectedItem(null);
+                        fetchClothingItems(); // Refresh the gallery after deletion
+                      } catch (err) {
+                        console.error("Error deleting item:", err);
+                      }
+                    }}
+                    style={{
+                      marginTop: 20,
+                      backgroundColor: "#ff5555",
+                      paddingHorizontal: 20,
+                      paddingVertical: 10,
+                      borderRadius: 8,
+                    }}
+                  >
+                    <Text style={{ color: "#fff", fontWeight: "bold" }}>Delete Item</Text>
+                  </TouchableOpacity>
+
+
+                  <Text
+                    onPress={() => setSelectedItem(null)}
+                    style={{
+                      color: "#ccc",
+                      fontSize: 16,
+                      marginTop: 30,
+                      textDecorationLine: "underline",
+                    }}
+                  >
+                    Close
+                  </Text>
+                </>
+              )}
+            </ScrollView>
+          </SafeAreaView>
+        </Modal>
+      </View>
+    );
+  };
+}
 
 export default Gallery;

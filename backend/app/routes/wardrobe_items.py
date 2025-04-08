@@ -62,7 +62,7 @@ def update_wardrobe_item(item_id):
     return jsonify({"message": "Item updated", "updated_item": updated_item}), 200
 
 # Delete a wardrobe item 
-@wardrobe_bp.route("/<item_id>", methods=["DELETE"])
+@wardrobe_bp.route("/delete/<item_id>", methods=["DELETE"])
 #@login_required
 def delete_wardrobe_item(item_id):
     user_id = session.get("user_id")

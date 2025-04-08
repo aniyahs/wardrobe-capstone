@@ -86,8 +86,6 @@ const PhotoUpload = () => {
     );
   };
 
-  
-
   const handleUpload = async () => {
     if (!selectedImage) return;
 
@@ -109,8 +107,10 @@ const PhotoUpload = () => {
         formality: pickerValues[5],
         size: pickerValues[6],
         favorite: pickerValues[8] === "Yes",
-        season: selectedSeason,
-      };
+        season: selectedSeason.length > 0
+            ? selectedSeason
+            : ["Summer", "Fall", "Winter", "Spring"],
+        };
 
       console.log("📡 Uploading item:", itemData);
       await savePhotoUrl(itemData);
@@ -221,6 +221,11 @@ const PhotoUpload = () => {
                     onChange: (value: string) => {
                       setSelectedType(value);
                       updatePickerValue(0, value);
+
+                      if (value === "Accessories") {
+                        updatePickerValue(3, ""); 
+                        updatePickerValue(6, ""); 
+                      }
                     },
                     selected: selectedType,
                   }, {
@@ -233,7 +238,10 @@ const PhotoUpload = () => {
                     options: ["XS", "S", "M", "L", "XL"],
                     onChange: (value: string) => updatePickerValue(6, value),
                     selected: pickerValues[6],
-                  }].map((dropdown, index) => (
+                  }].map((dropdown, index) => {
+                    if (dropdown.label === "Size" && selectedType === "Accessories") return null;
+                  
+                    return (
                     <View key={index} style={{ alignItems: "center" }}>
                       <View style={styles.dropShadow} />
                       <View style={styles.centeredPickerContainer}>
@@ -256,17 +264,13 @@ const PhotoUpload = () => {
                         </View>
                       </View>
                     </View>
-                  ))}
+                    );
+                  })}
                 </View>
 
                 <View style={styles.dropdownColumn}>
                   {/* Texture, Formality, Favorite */}
-                  {[{
-                    label: "Texture",
-                    options: ["Cotton", "Denim", "Wool", "Linen", "Fleece", "Leather", "Suede"],
-                    onChange: (value: string) => updatePickerValue(3, value),
-                    selected: pickerValues[3],
-                  }, {
+                  {[ {
                     label: "Formality",
                     options: ["Casual", "Business Casual", "Formal"],
                     onChange: (value: string) => updatePickerValue(5, value),
@@ -276,7 +280,16 @@ const PhotoUpload = () => {
                     options: ["Yes", "No"],
                     onChange: (value: string) => updatePickerValue(8, value),
                     selected: pickerValues[8],
-                  }].map((dropdown, index) => (
+                  }, {
+                    label: "Texture",
+                    options: ["Cotton", "Denim", "Wool", "Linen", "Fleece", "Leather", "Suede"],
+                    onChange: (value: string) => updatePickerValue(3, value),
+                    selected: pickerValues[3],
+                  }].map((dropdown, index) => {
+                    if (dropdown.label === "Texture" && selectedType === "Accessories") return null;
+                  
+                    return (
+
                     <View key={index} style={{ alignItems: "center" }}>
                       <View style={styles.dropShadow} />
                       <View style={styles.centeredPickerContainer}>
@@ -299,12 +312,17 @@ const PhotoUpload = () => {
                         </View>
                       </View>
                     </View>
-                  ))}
+                    );
+                  })}
                 </View>
               </View>
 
               <View style={{ marginTop: 20 }}>
-                <GradientButton title="Upload" onPress={handleUpload} size="medium" />
+                <GradientButton title="Upload" onPress={() => {
+                  if (!isUploading) {
+                    handleUpload();
+                  }
+                }} size="medium" />
               </View>
             </>
           )}
