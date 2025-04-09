@@ -1,13 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-
-export const storeUserId = async (userId: string) => {
-  await AsyncStorage.setItem("userId", userId);
-};
-
-export const getCurrentUserId = async (): Promise<string | null> => {
-    return await AsyncStorage.getItem("userId");
-  };
-
 export const loginUser = async (email: string, password: string) => {
   try {
       const response = await fetch("http://10.0.2.2:5001/users/login", { // Use /login, NOT /register
