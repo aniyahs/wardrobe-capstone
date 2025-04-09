@@ -15,5 +15,6 @@ docker-data/
 
 # Aniyah's virtual environment 
 .venv/
+venv/
 
 backend/.env

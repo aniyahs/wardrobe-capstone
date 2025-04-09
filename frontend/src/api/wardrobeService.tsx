@@ -3,6 +3,7 @@ import { getCurrentUserId } from "./authService";
 
 // Define the structure of a clothing item
 export interface ClothingItem {
+  favorite: any;
   _id: string;
   type: string;
   style: string;
@@ -92,6 +93,28 @@ export const deleteClothingItem = async (itemId: string) => {
     return true;
   } catch (error) {
     console.error("Error deleting item:", error);
+    throw error;
+  }
+};
+
+
+export const toggleFavoriteItem = async (itemId: string, currentFavorite: boolean) => {
+  try {
+    const response = await fetch(`http://10.0.2.2:5001/wardrobe/update/${itemId}`, {
+      method: "PATCH",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ favorite: !currentFavorite }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to update favorite status.");
+    }
+
+    return true;
+  } catch (error) {
+    console.error("Error toggling favorite:", error);
     throw error;
   }
 };
