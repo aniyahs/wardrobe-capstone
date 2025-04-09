@@ -13,6 +13,7 @@ export interface ClothingItem {
   formality: string;
   imageUrl: string;
   tags?: Record<string, string> | string[];
+  favorite?: boolean;
 }
 
 // Define the context type
@@ -95,3 +96,16 @@ export const deleteClothingItem = async (itemId: string) => {
     throw error;
   }
 };
+
+export async function toggleFavoriteItem(id: string, newValue: boolean): Promise<void> {
+  const response = await fetch(`http://10.0.2.2:5001/wardrobe/${id}/favorite`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ favorite: newValue }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to toggle favorite");
+  }
+}
+
