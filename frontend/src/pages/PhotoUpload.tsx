@@ -15,7 +15,7 @@ import { getCurrentUserId } from "../api/authService";
 import GradientButton from "../components/GradientButton";
 import { Picker } from "@react-native-picker/picker";
 import  ColorPicker  from "react-native-wheel-color-picker";
-import { predictTags } from "@/api/predictService";
+import { predictTags } from "../api/predictService";
 
 
 const PhotoUpload = () => {

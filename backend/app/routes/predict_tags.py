@@ -6,7 +6,7 @@ from PIL import Image
 import io
 import pickle
 
-predict_bp = Blueprint('predict_bp', __name__)
+predict_bp = Blueprint('predict', __name__)
 
 # Load the model and the encoders for type, color, and pattern
 model = tf.keras.models.load_model('wearwell_mobilenetv2.h5')
@@ -29,7 +29,7 @@ def preprocess_image(url):
     img_array = np.expand_dims(img_array, axis=0)  
     return img_array
 
-@predict_bp.route('/predict_tags', methods=['POST'])
+@predict_bp.route('/tags', methods=['POST'])
 def predict_tags():
     data = request.get_json()
     image_url = data.get('imageUrl')
