@@ -9,8 +9,10 @@ import pickle
 predict_bp = Blueprint('predict', __name__)
 
 # Load the model and the encoders for type, color, and pattern
-model = tf.keras.models.load_model('wearwell_mobilenetv2.h5')
+# model = tf.keras.models.load_model('wearwell_mobilenetv2.h5')
+model = None  # or load a dummy model
 
+""" 
 with open('type_encoder.pkl', 'rb') as f:
     type_encoder = pickle.load(f)
 
@@ -58,3 +60,4 @@ def predict_tags():
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+ """
