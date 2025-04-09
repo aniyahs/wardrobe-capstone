@@ -96,4 +96,24 @@ def get_all_wardrobe_items():
     except Exception as e:
         print("Error fetching wardrobe items:", e)
         return jsonify({"error": "Error fetching wardrobe items"}), 500
+    
+    # Toggle favorite status
+@wardrobe_bp.route("/<item_id>/favorite", methods=["PATCH"])
+def toggle_favorite(item_id):
+    data = request.get_json()
+    new_favorite = data.get("favorite")
+
+    if new_favorite is None:
+        return jsonify({"error": "Missing 'favorite' in request body"}), 400
+
+    result = wardrobe_collection.update_one(
+        {"_id": ObjectId(item_id)},
+        {"$set": {"favorite": new_favorite}}
+    )
+
+    if result.matched_count == 0:
+        return jsonify({"error": "Item not found"}), 404
+
+    return jsonify({"message": "Favorite status updated"}), 200
+
 
