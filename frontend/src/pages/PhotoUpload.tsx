@@ -34,6 +34,14 @@ const PhotoUpload = () => {
     Accessories: ["Hat", "Belt", "Scarf", "Gloves", "Sunglasses", "Watch", "Tie"],
   };
 
+  const reverseStyleToTypeMap: Record<string, string> = {
+    "T-Shirt": "Tops", "Long Sleeve Shirt": "Tops", "Blouse": "Tops", "Tank Top": "Tops", "Polo": "Tops", "Button-Up Shirt": "Tops", "Dress": "Tops",
+    "Jeans": "Bottoms", "Chinos": "Bottoms", "Shorts": "Bottoms", "Trousers": "Bottoms", "Joggers": "Bottoms", "Leggings": "Bottoms", "Skirt": "Bottoms",
+    "Jacket": "Outerwear", "Blazer": "Outerwear", "Coat": "Outerwear", "Vest": "Outerwear", "Windbreaker": "Outerwear", "Raincoat": "Outerwear", "Hoodie": "Outerwear", "Sweatshirt": "Outerwear", "Sweater": "Outerwear",
+    "Sneakers": "Footwear", "Boots": "Footwear", "Dress Shoes": "Footwear", "Loafers": "Footwear", "Sandals": "Footwear", "Heels": "Footwear",
+    "Hat": "Accessories", "Belt": "Accessories", "Scarf": "Accessories", "Gloves": "Accessories", "Sunglasses": "Accessories", "Watch": "Accessories", "Tie": "Accessories"
+  };
+
   const [selectedType, setSelectedType] = useState<string>("Tops");
   const [selectedSeason, setSelectedSeason] = useState<string[]>([]);
 
@@ -95,43 +103,72 @@ const PhotoUpload = () => {
     setIsUploading(true);
 
     try {
+      console.log("📤 Uploading image to Firebase...");
       const downloadUrl = await uploadImageToStorage(selectedImage);
+      console.log("✅ Image uploaded! Download URL:", downloadUrl);
+
       const userId = await getCurrentUserId();
+      console.log("✅ Got user ID:", userId);
 
       if (!userId) throw new Error("User not logged in");
 
       // for predicting the tags
-      setIsPredicting(true);
+      //setIsPredicting(true);
+      console.log("🔮 Predicting tags...");
       const predictedTags = await predictTags(downloadUrl);
       console.log('🎯 Predicted tags:', predictedTags);
-      setIsPredicting(false);
+      //setIsPredicting(false);
 
-      updatePickerValue(0, predictedTags.type || "Tops");    
-      updatePickerValue(2, predictedTags.color || "#000000"); 
-      updatePickerValue(3, predictedTags.pattern || "Solid");
+      const predictedStyle = predictedTags.type || "T-Shirt";   
+      const colorValue = predictedTags.color || "#000000";
+      const patternValue = predictedTags.pattern || "Solid";
 
-      const itemData = {
-        userId,
-        photoUrl: downloadUrl,
-        type: pickerValues[0],
-        style: pickerValues[1],
-        color: pickerValues[2],
-        texture: pickerValues[3],
-        formality: pickerValues[5],
-        size: pickerValues[6],
-        favorite: pickerValues[8] === "Yes",
-        season: selectedSeason.length > 0
-            ? selectedSeason
-            : ["Summer", "Fall", "Winter", "Spring"],
-        };
+      console.log("🛠️ Setting predicted values...");
+      const mappedType = reverseStyleToTypeMap[predictedStyle] || "Tops";
+      setSelectedType(mappedType);
 
-      console.log("📡 Uploading item:", itemData);
-      await savePhotoUrl(itemData);
-      Alert.alert("Success", "Image uploaded and saved to MongoDB!");
+      const validStyles = styleOptionsMap[mappedType] || [];
+      const matchedStyle = validStyles.includes(predictedStyle) ? predictedStyle : validStyles[0];
 
-      setSelectedImage(null);
-      setPickerValues(Array(9).fill(""));
-      setSelectedSeason([]);
+      setSelectedType(mappedType);
+
+      setPickerValues(prev => {
+        const updated = [...prev];
+        updated[0] = mappedType;   // Make sure dropdown Type shows "Bottoms", etc
+        updated[1] = matchedStyle; // Style ("Jeans", etc.)
+        updated[2] = colorValue;
+        updated[3] = patternValue;
+        updated[5] = "Casual";
+        updated[6] = "M";
+        updated[8] = "No";
+        return updated;
+      });
+
+      setStep("tags");
+      console.log("🏁 Finished handleUpload!");
+
+      // Now after prediction and setting values, save to Mongo
+      // const itemData = {
+      //   userId,
+      //   photoUrl: downloadUrl,
+      //   type: mappedType,
+      //   style: matchedStyle,
+      //   color: colorValue,
+      //   texture: patternValue,
+      //   formality: "Casual",
+      //   size: "M",
+      //   favorite: false,
+      //   season: selectedSeason.length > 0 ? selectedSeason : ["Summer", "Fall", "Winter", "Spring"],
+      // };
+
+      // console.log("📡 Saving item:", itemData);
+      // await savePhotoUrl(itemData);
+
+      // Alert.alert("Success", "Item uploaded and saved!");
+      // setSelectedImage(null);
+      // setPickerValues(Array(9).fill(""));
+      // setSelectedSeason([]);
+
     } catch (err) {
       console.error("❌ Upload failed:", err);
       Alert.alert("Upload Failed", "Could not upload image.");
@@ -139,6 +176,62 @@ const PhotoUpload = () => {
       setIsUploading(false);
     }
   };
+
+  const handleSave = async () => {
+    try{
+      const userId = await getCurrentUserId();
+      if(!userId) throw new Error("User not logged in");
+
+      const itemData = {
+        userId,
+        photoUrl: selectedImage,
+        type: pickerValues[0],
+        style: pickerValues[1],
+        color: pickerValues[2],
+        texture: pickerValues[3],
+        formality: pickerValues[5],
+        size: pickerValues[6],
+        favorite: pickerValues[8] === "Yes",
+        season: selectedSeason.length > 0 ? selectedSeason : ["Summer", "Fall", "Winter", "Spring"],
+      };
+
+      console.log("Saving item in MongoDB: ", itemData);
+      await savePhotoUrl(itemData);
+
+      Alert.alert("Success", "Item saved to wardrobe!");
+      setSelectedImage(null);
+      setPickerValues(Array(9).fill(""));
+      setSelectedSeason([]);
+    } catch (err) {
+      console.error("❌ Save failed:", err);
+      Alert.alert("Save Failed", "Could not save item.");
+    } 
+  };
+
+  const Dropdown = ({ label, options, value, onChange }: { label: string; options: string[]; value: string; onChange: (v: string) => void }) => (
+    <View style={{ alignItems: "center" }}>
+      <View style={styles.dropShadow} />
+      <View style={styles.centeredPickerContainer}>
+        <View style={{ flexDirection: "column", width: '100%' }}>
+          <Text style={styles.pickerLabel}>{label}:</Text>
+          <View style={styles.pickerWrapper} />
+          <View style={{ flexDirection: "row" }}>
+            <Picker
+              selectedValue={value}
+              style={styles.picker}
+              onValueChange={onChange}
+              dropdownIconColor="#DDD"
+              mode="dropdown"
+            >
+              {options.map(opt => (
+                <Picker.Item label={opt} value={opt} key={opt} style={styles.pickerItem} />
+              ))}
+            </Picker>
+          </View>
+        </View>
+      </View>
+    </View>
+  );    
 
   return (
     <View style={globalStyles.container}>
@@ -158,6 +251,7 @@ const PhotoUpload = () => {
         <>
           <Image source={{ uri: selectedImage }} style={globalStyles.imagePreview} />
 
+          {/* Color Picker */}
           {step === "color" ? (
             <>
               <View style={{ alignItems: "center", marginTop: 30 }}>
@@ -196,9 +290,9 @@ const PhotoUpload = () => {
               <View style={{ marginTop: 30 }}>
                 <GradientButton
                   title="Next"
-                  onPress={() => {
+                  onPress={async () => {
                     updatePickerValue(2, selectedHexColor);
-                    setStep("tags");
+                    await handleUpload();
                   }}
                   size="medium"
                 />
@@ -206,6 +300,7 @@ const PhotoUpload = () => {
             </>
           ) : (
             <>
+            {/* Season Picker */}
               <View style={styles.multiSelectContainer}>
                 <View style={styles.seasonOptions}>
                   {["Summer", "Fall", "Winter", "Spring"].map(season => (
@@ -225,115 +320,67 @@ const PhotoUpload = () => {
                 </View>
               </View>
 
+              {/* DropDowns: Type / Style / Size */}
               <View style={styles.dropdownGrid}>
                 <View style={styles.dropdownColumn}>
-                  {/* Type, Style, Size */}
-                  {[{
-                    label: "Type",
-                    options: Object.keys(styleOptionsMap),
-                    onChange: (value: string) => {
+                  {/* Type */}
+                  <Dropdown
+                    label="Type"
+                    options={Object.keys(styleOptionsMap)}
+                    value={selectedType}
+                    onChange={value => {
                       setSelectedType(value);
                       updatePickerValue(0, value);
-
-                      if (value === "Accessories") {
-                        updatePickerValue(3, ""); 
-                        updatePickerValue(6, ""); 
-                      }
-                    },
-                    selected: selectedType,
-                  }, {
-                    label: "Style",
-                    options: styleOptionsMap[selectedType],
-                    onChange: (value: string) => updatePickerValue(1, value),
-                    selected: pickerValues[1],
-                  }, {
-                    label: "Size",
-                    options: ["XS", "S", "M", "L", "XL"],
-                    onChange: (value: string) => updatePickerValue(6, value),
-                    selected: pickerValues[6],
-                  }].map((dropdown, index) => {
-                    if (dropdown.label === "Size" && selectedType === "Accessories") return null;
-                  
-                    return (
-                    <View key={index} style={{ alignItems: "center" }}>
-                      <View style={styles.dropShadow} />
-                      <View style={styles.centeredPickerContainer}>
-                        <View style={{ flexDirection: "column" }}>
-                          <Text style={styles.pickerLabel}>{dropdown.label}:</Text>
-                          <View style={styles.pickerWrapper}></View>
-                          <View style={{ flexDirection: "row" }}>
-                            <Picker
-                              selectedValue={dropdown.selected}
-                              style={styles.picker}
-                              onValueChange={dropdown.onChange}
-                              dropdownIconColor="#DDD"
-                              mode="dropdown"
-                            >
-                              {dropdown.options.map(opt => (
-                                <Picker.Item label={opt} value={opt} key={opt} style={styles.pickerItem} />
-                              ))}
-                            </Picker>
-                          </View>
-                        </View>
-                      </View>
-                    </View>
-                    );
-                  })}
+                    }}
+                  /> 
+                  {/* Style */}
+                    <Dropdown
+                      label="Style"
+                      options={styleOptionsMap[selectedType] || []}
+                      value={pickerValues[1]}
+                      onChange={value => updatePickerValue(1, value)}
+                  /> 
+                  {/* Size */}
+                  {selectedType !== "Accessories" && (
+                    <Dropdown
+                      label="Size"
+                      options={["XS", "S", "M", "L", "XL"]}
+                      value={pickerValues[6]}
+                      onChange={value => updatePickerValue(6, value)}
+                  />
+                )}
                 </View>
 
+                {/* Texture, Formality, Favorite */}
                 <View style={styles.dropdownColumn}>
-                  {/* Texture, Formality, Favorite */}
-                  {[ {
-                    label: "Formality",
-                    options: ["Casual", "Business Casual", "Formal"],
-                    onChange: (value: string) => updatePickerValue(5, value),
-                    selected: pickerValues[5],
-                  }, {
-                    label: "Favorite",
-                    options: ["Yes", "No"],
-                    onChange: (value: string) => updatePickerValue(8, value),
-                    selected: pickerValues[8],
-                  }, {
-                    label: "Texture",
-                    options: ["Cotton", "Denim", "Wool", "Linen", "Fleece", "Leather", "Suede"],
-                    onChange: (value: string) => updatePickerValue(3, value),
-                    selected: pickerValues[3],
-                  }].map((dropdown, index) => {
-                    if (dropdown.label === "Texture" && selectedType === "Accessories") return null;
-                  
-                    return (
+                  <Dropdown
+                    label="Formality"
+                    options={["Casual", "Business Casual", "Formal"]}
+                    value={pickerValues[5]}
+                    onChange={value => updatePickerValue(5, value)}
+                  />
+                  <Dropdown
+                    label="Favorite"
+                    options={["Yes", "No"]}
+                    value={pickerValues[8]}
+                    onChange={value => updatePickerValue(8, value)}
+                  />
 
-                    <View key={index} style={{ alignItems: "center" }}>
-                      <View style={styles.dropShadow} />
-                      <View style={styles.centeredPickerContainer}>
-                        <View style={{ flexDirection: "column" }}>
-                          <Text style={styles.pickerLabel}>{dropdown.label}:</Text>
-                          <View style={styles.pickerWrapper}></View>
-                          <View style={{ flexDirection: "row" }}>
-                            <Picker
-                              selectedValue={dropdown.selected}
-                              style={styles.picker}
-                              onValueChange={dropdown.onChange}
-                              dropdownIconColor="#DDD"
-                              mode="dropdown"
-                            >
-                              {dropdown.options.map(opt => (
-                                <Picker.Item label={opt} value={opt} key={opt} style={styles.pickerItem} />
-                              ))}
-                            </Picker>
-                          </View>
-                        </View>
-                      </View>
-                    </View>
-                    );
-                  })}
+                  {selectedType !== "Accessories" && (
+                    <Dropdown
+                      label="Texture"
+                      options={["Cotton", "Denim", "Wool", "Linen", "Fleece", "Leather", "Suede"]}
+                      value={pickerValues[3]}
+                      onChange={value => updatePickerValue(3, value)}
+                    />
+                  )}
+                  </View>
                 </View>
-              </View>
 
               <View style={{ marginTop: 20 }}>
                 <GradientButton title="Upload" onPress={() => {
                   if (!isUploading) {
-                    handleUpload();
+                    handleSave();
                   }
                 }} size="medium" />
               </View>

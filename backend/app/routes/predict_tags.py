@@ -9,15 +9,15 @@ import pickle
 predict_bp = Blueprint('predict_bp', __name__)
 
 #  Load model and encoders 
-model = tf.keras.models.load_model('app', 'models', 'best_model.h5')
+model = tf.keras.models.load_model('app/models/best_model.h5')
 
-with open('app', 'models', 'type_encoder.pkl', 'rb') as f:
+with open('app/models/type_encoder.pkl', 'rb') as f:
     type_encoder = pickle.load(f)
 
-with open('app', 'models', 'color_encoder.pkl', 'rb') as f:
+with open('app/models/color_encoder.pkl', 'rb') as f:
     color_encoder = pickle.load(f)
 
-with open('app', 'models', 'pattern_encoder.pkl', 'rb') as f:
+with open('app/models/pattern_encoder.pkl', 'rb') as f:
     pattern_encoder = pickle.load(f)
 
 # Preprocessing 
@@ -30,7 +30,7 @@ def preprocess_image(url):
     return img_array
 
 # Predict route
-@predict_bp.route('/predict_tags', methods=['POST'])  
+@predict_bp.route('/tags', methods=['POST'])  
 def predict_tags():
     data = request.get_json()
     image_url = data.get('imageUrl')
