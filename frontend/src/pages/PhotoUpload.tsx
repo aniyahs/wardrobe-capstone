@@ -25,22 +25,70 @@ const PhotoUpload = () => {
   const [pickerValues, setPickerValues] = useState<string[]>(Array(9).fill(""));
   const [selectedHexColor, setSelectedHexColor] = useState<string>("#000000");
   const [step, setStep] = useState<"color" | "tags">("color");
+  
 
-  const styleOptionsMap: Record<string, string[]> = {
-    Tops: ["T-Shirt", "Long Sleeve Shirt", "Blouse", "Tank Top", "Polo", "Button-Up Shirt", "Dress"],
-    Bottoms: ["Jeans", "Chinos", "Shorts", "Trousers", "Joggers", "Leggings", "Skirt"],
-    Outerwear: ["Jacket", "Blazer", "Coat", "Vest", "Windbreaker", "Raincoat", "Hoodie", "Sweatshirt", "Sweater"],
-    Footwear: ["Sneakers", "Boots", "Dress Shoes", "Loafers", "Sandals", "Heels"],
-    Accessories: ["Hat", "Belt", "Scarf", "Gloves", "Sunglasses", "Watch", "Tie"],
-  };
+  const styleInfoMap: Record<
+    string,
+    {
+      type: string;
+      formality: string;
+      texture: string;
+    }> = 
+    {
+      // Tops
+      "T-Shirt": { type: "Tops", formality: "Casual", texture: "Cotton" },
+      "Long Sleeve Shirt": { type: "Tops", formality: "Business Casual", texture: "Cotton" },
+      "Blouse": { type: "Tops", formality: "Formal", texture: "Linen" },
+      "Tank Top": { type: "Tops", formality: "Casual", texture: "Cotton" },
+      "Polo": { type: "Tops", formality: "Business Casual", texture: "Cotton" },
+      "Button-Up Shirt": { type: "Tops", formality: "Formal", texture: "Cotton" },
+      "Dress": { type: "Tops", formality: "Formal", texture: "Linen" },
 
-  const reverseStyleToTypeMap: Record<string, string> = {
-    "T-Shirt": "Tops", "Long Sleeve Shirt": "Tops", "Blouse": "Tops", "Tank Top": "Tops", "Polo": "Tops", "Button-Up Shirt": "Tops", "Dress": "Tops",
-    "Jeans": "Bottoms", "Chinos": "Bottoms", "Shorts": "Bottoms", "Trousers": "Bottoms", "Joggers": "Bottoms", "Leggings": "Bottoms", "Skirt": "Bottoms",
-    "Jacket": "Outerwear", "Blazer": "Outerwear", "Coat": "Outerwear", "Vest": "Outerwear", "Windbreaker": "Outerwear", "Raincoat": "Outerwear", "Hoodie": "Outerwear", "Sweatshirt": "Outerwear", "Sweater": "Outerwear",
-    "Sneakers": "Footwear", "Boots": "Footwear", "Dress Shoes": "Footwear", "Loafers": "Footwear", "Sandals": "Footwear", "Heels": "Footwear",
-    "Hat": "Accessories", "Belt": "Accessories", "Scarf": "Accessories", "Gloves": "Accessories", "Sunglasses": "Accessories", "Watch": "Accessories", "Tie": "Accessories"
-  };
+      // Bottoms
+      "Jeans": { type: "Bottoms", formality: "Casual", texture: "Denim" },
+      "Chinos": { type: "Bottoms", formality: "Business Casual", texture: "Cotton" },
+      "Shorts": { type: "Bottoms", formality: "Casual", texture: "Cotton" },
+      "Trousers": { type: "Bottoms", formality: "Formal", texture: "Wool" },
+      "Joggers": { type: "Bottoms", formality: "Casual", texture: "Fleece" },
+      "Leggings": { type: "Bottoms", formality: "Casual", texture: "Cotton" },
+      "Skirt": { type: "Bottoms", formality: "Formal", texture: "Linen" },
+
+      // Outerwear
+      "Jacket": { type: "Outerwear", formality: "Casual", texture: "Leather" },
+      "Blazer": { type: "Outerwear", formality: "Formal", texture: "Wool" },
+      "Coat": { type: "Outerwear", formality: "Formal", texture: "Wool" },
+      "Vest": { type: "Outerwear", formality: "Business Casual", texture: "Cotton" },
+      "Windbreaker": { type: "Outerwear", formality: "Casual", texture: "Nylon" },
+      "Raincoat": { type: "Outerwear", formality: "Casual", texture: "Nylon" },
+      "Hoodie": { type: "Outerwear", formality: "Casual", texture: "Fleece" },
+      "Sweatshirt": { type: "Outerwear", formality: "Casual", texture: "Fleece" },
+      "Sweater": { type: "Outerwear", formality: "Business Casual", texture: "Wool" },
+
+      // Footwear
+      "Sneakers": { type: "Footwear", formality: "Casual", texture: "Leather" },
+      "Boots": { type: "Footwear", formality: "Casual", texture: "Suede" },
+      "Dress Shoes": { type: "Footwear", formality: "Formal", texture: "Leather" },
+      "Loafers": { type: "Footwear", formality: "Business Casual", texture: "Leather" },
+      "Sandals": { type: "Footwear", formality: "Casual", texture: "Leather" },
+      "Heels": { type: "Footwear", formality: "Formal", texture: "Leather" },
+
+      // Accessories
+      "Hat": { type: "Accessories", formality: "Casual", texture: "Wool" },
+      "Belt": { type: "Accessories", formality: "Formal", texture: "Leather" },
+      "Scarf": { type: "Accessories", formality: "Casual", texture: "Wool" },
+      "Gloves": { type: "Accessories", formality: "Casual", texture: "Leather" },
+      "Sunglasses": { type: "Accessories", formality: "Casual", texture: "Plastic" },
+      "Watch": { type: "Accessories", formality: "Business Casual", texture: "Metal" },
+      "Tie": { type: "Accessories", formality: "Formal", texture: "Silk" },
+    };
+
+  const typeToStylesMap: Record<string, string[]> = Object.values(styleInfoMap).reduce((acc, { type }, index, arr) => {
+    const style = Object.keys(styleInfoMap)[index];
+    if (!acc[type]) acc[type] = [];
+    acc[type].push(style);
+    return acc;
+  }, {} as Record<string, string[]>);
+    
 
   const [selectedType, setSelectedType] = useState<string>("Tops");
   const [selectedSeason, setSelectedSeason] = useState<string[]>([]);
@@ -124,21 +172,29 @@ const PhotoUpload = () => {
       const patternValue = predictedTags.pattern || "Solid";
 
       console.log("🛠️ Setting predicted values...");
-      const mappedType = reverseStyleToTypeMap[predictedStyle] || "Tops";
+      const styleInfo = styleInfoMap[predictedStyle];
+      const mappedType = styleInfo?.type || "Tops";
+      const formalityValue = styleInfo?.formality || "Casual";
+      const textureValue = styleInfo?.texture || patternValue;
+
       setSelectedType(mappedType);
 
-      const validStyles = styleOptionsMap[mappedType] || [];
+      const validStyles = typeToStylesMap[mappedType] || [];
       const matchedStyle = validStyles.includes(predictedStyle) ? predictedStyle : validStyles[0];
 
       setSelectedType(mappedType);
 
+      const matchedStyleInfo = styleInfoMap[matchedStyle];
+      const autoTexture = matchedStyleInfo?.texture || patternValue;
+      const autoFormality = matchedStyleInfo?.formality || "Casual";
+
       setPickerValues(prev => {
         const updated = [...prev];
-        updated[0] = mappedType;   // Make sure dropdown Type shows "Bottoms", etc
-        updated[1] = matchedStyle; // Style ("Jeans", etc.)
+        updated[0] = mappedType;
+        updated[1] = matchedStyle;
         updated[2] = colorValue;
-        updated[3] = patternValue;
-        updated[5] = "Casual";
+        updated[3] = autoTexture;      // ⬅️ From styleInfoMap
+        updated[5] = autoFormality;    // ⬅️ From styleInfoMap
         updated[6] = "M";
         updated[8] = "No";
         return updated;
@@ -326,20 +382,36 @@ const PhotoUpload = () => {
                   {/* Type */}
                   <Dropdown
                     label="Type"
-                    options={Object.keys(styleOptionsMap)}
+                    options={Object.keys(typeToStylesMap)}
                     value={selectedType}
                     onChange={value => {
                       setSelectedType(value);
                       updatePickerValue(0, value);
+
+                      // Auto-set style to first style of selected type
+                      const stylesForType = typeToStylesMap[value];
+                      if (stylesForType && stylesForType.length > 0) {
+                        updatePickerValue(1, stylesForType[0]);
+                      }
                     }}
-                  /> 
-                  {/* Style */}
-                    <Dropdown
-                      label="Style"
-                      options={styleOptionsMap[selectedType] || []}
-                      value={pickerValues[1]}
-                      onChange={value => updatePickerValue(1, value)}
-                  /> 
+                  />
+
+<Dropdown
+  label="Style"
+  options={typeToStylesMap[selectedType] || []}
+  value={pickerValues[1]}
+  onChange={value => {
+    const info = styleInfoMap[value];
+    const updated = [...pickerValues];
+    updated[1] = value;
+    if (info) {
+      updated[3] = info.texture;
+      updated[5] = info.formality;
+    }
+    setPickerValues(updated);
+  }}
+/>
+
                   {/* Size */}
                   {selectedType !== "Accessories" && (
                     <Dropdown

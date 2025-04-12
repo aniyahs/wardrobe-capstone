@@ -9,3 +9,4 @@ numpy
 tensorflow
 opencv-python
 dotenv
+scikit-learn
