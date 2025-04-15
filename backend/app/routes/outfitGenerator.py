@@ -7,26 +7,34 @@ import random
 # -------------------------
 
 def hexToHSV(clothes):
-    color = clothes["color"].lstrip("#")
+    color = clothes.get("color", "").lstrip("#")
+
+    # Validate length and characters
+    if len(color) != 6 or not all(c in "0123456789abcdefABCDEF" for c in color):
+        raise ValueError(f"Invalid hex color: '{clothes.get('color')}'")
+
     r, g, b = [int(color[i:i+2], 16) for i in (0, 2, 4)]
     r_norm, g_norm, b_norm = r / 255.0, g / 255.0, b / 255.0
     c_max = max(r_norm, g_norm, b_norm)
     c_min = min(r_norm, g_norm, b_norm)
     delta = c_max - c_min
+
     if delta == 0:
-        h = 0 
+        h = 0
     elif c_max == r_norm:
         h = ((g_norm - b_norm) / delta) % 6
     elif c_max == g_norm:
         h = ((b_norm - r_norm) / delta) + 2
-    elif c_max == b_norm:
+    else:
         h = ((r_norm - g_norm) / delta) + 4
+
     h = round(h * 60)
     if h < 0:
-        h += 360 
+        h += 360
     s = 0 if c_max == 0 else (delta / c_max) * 100
     v = c_max * 100
     return round(h, 2), round(s, 2), round(v, 2)
+
 
 def isNeutral(h, s, v):
     if v < 12 or v > 88: 
@@ -73,11 +81,6 @@ def no_socks_with_sandals_or_heels(outfit):
     has_sandals_or_heels = any(item['type'] in ['Sandals', 'Heels'] for item in outfit)
     return not (has_socks and has_sandals_or_heels)
 
-def heels_require_skirt(outfit):
-    has_heels = any(item['type'] == 'Heels' for item in outfit)
-    has_skirt = any(item['type'] == 'Skirt' for item in outfit)
-    return not has_heels or has_skirt
-
 def avoid_complementary_colors(outfit):
     for item in outfit:
         h, s, v = hexToHSV(item)
@@ -103,13 +106,18 @@ def all_unique(*args):
     non_none = [x for x in args if x is not None]
     return len(non_none) == len(set(id(x) for x in non_none))
 
+def is_valid_hex_color(color):
+    return isinstance(color, str) and color.startswith("#") and len(color) == 7
+
 # -------------------------
 # Outfit Generator
 # -------------------------
 
 def generate_outfit_cps(season, formality, wardrobeItems, temperature=None, weathercode=None, userId=None):
-    if wardrobeItems and wardrobeItems[0].get("_id") == "1":
-        print("Default")
+    wardrobeItems = [
+    item for item in wardrobeItems
+    if is_valid_hex_color(item.get("color", ""))
+]
     # Do something
 
     tops_candidates = [item for item in wardrobeItems if item['type'] == 'Tops']
@@ -152,19 +160,45 @@ def generate_outfit_cps(season, formality, wardrobeItems, temperature=None, weat
         outfit = outfit_from_assignment(assignment)
         penalty = 0
 
+        penalties = []
+
         if not all_unique(*assignment.values()):
             penalty += 10
-        if not max_three_colors(outfit): penalty += 1
-        if not avoid_monochrome(outfit): penalty += 1
-        if not check_layers(outfit): penalty += 1
-        if not no_socks_with_sandals_or_heels(outfit): penalty += 1
-        if not heels_require_skirt(outfit): penalty += 1
-        if not avoid_complementary_colors(outfit): penalty += 1
-        if not best_match_color(outfit): penalty += 1
+            penalties.append("Duplicate items found.")
+        if not max_three_colors(outfit): 
+            penalty += 1
+            penalties.append("More than 3 colors in outfit.")
+        if not avoid_monochrome(outfit): 
+            penalty += 1
+            penalties.append("Monochrome outfit detected.")
+        if not check_layers(outfit): 
+            penalty += 1
+            penalties.append("Too many layers.")
+        if not no_socks_with_sandals_or_heels(outfit): 
+            penalty += 1
+            penalties.append("Socks with sandals or heels.")
+        if not avoid_complementary_colors(outfit): 
+            penalty += 1
+            penalties.append("Complementary colors detected.")
+        if not best_match_color(outfit): 
+            penalty += 1
+            penalties.append("No best match color found.")
+
+        temp_season = False
+        temp_formality = False
 
         for item in outfit:
-            if not get_seasons_match(item, season): penalty += 10
-            if item['formality'] != formality: penalty += 10
+            if not get_seasons_match(item, season): 
+                penalty += 10
+                temp_season = True
+            if item['formality'] != formality: 
+                penalty += 10
+                temp_formality = True
+
+        if temp_season: 
+            penalties.append("Season mismatch detected.")
+        if temp_formality: 
+            penalties.append("Formality mismatch detected.")
 
         # 🧥 Require base layer if under 50°F
         if temperature is not None and temperature < 50:
@@ -191,7 +225,7 @@ def generate_outfit_cps(season, formality, wardrobeItems, temperature=None, weat
                 if not (h <= 60 or h >= 300):
                     penalty += 1
 
-        return penalty
+        return penalty, penalties
 
     def partial_penalty(assignment):
         penalty = 0
@@ -214,14 +248,16 @@ def generate_outfit_cps(season, formality, wardrobeItems, temperature=None, weat
 
     best_solution = None
     best_penalty = float('inf')
+    penalties = []
 
     def backtrack(index, current_assignment):
-        nonlocal best_solution, best_penalty
+        nonlocal best_solution, best_penalty, penalties
         if index == len(variables):
-            pen = calculate_penalty(current_assignment)
+            pen, temp_penalties = calculate_penalty(current_assignment)
             if pen < best_penalty:
                 best_penalty = pen
                 best_solution = current_assignment.copy()
+                penalties = temp_penalties
             return
 
         var = variables[index]
@@ -235,16 +271,22 @@ def generate_outfit_cps(season, formality, wardrobeItems, temperature=None, weat
 
     if best_solution:
         final_outfit = outfit_from_assignment(best_solution)
-        print(f"Closest outfit found with penalty {best_penalty}")
+
+        print("------------------------------")
+        print(f"Penalty: {best_penalty}")
+        print()
+
         for item in final_outfit:
-            if item is not None:
-                print("Outfit item:")
-                for key, value in item.items():
-                    print(f"  {key}: {value}")
-                print("-" * 30)  # Separator between items
-            else:
-                print("None")
-        
+            if item is None:
+                continue
+            style = item.get("style", "Unknown")
+            item_id = item.get("_id", "N/A")
+            print(f"{style}: {item_id}")
+
+        print()
+        for reason in penalties:
+            print(f"- {reason}")
+        print()
         return final_outfit
     else:
         print("No outfit found.")

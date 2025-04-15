@@ -20,7 +20,7 @@ const StyledText: React.FC<StyledTextProps> = ({ size, variant = "title", style,
 
 const styles = StyleSheet.create({
   title: {
-    fontWeight: "bold",
+    fontFamily: "Inter_18pt-Bold",
     color: "#EEE",
     textShadowColor: "rgba(0, 0, 0, 0.7)",
     textShadowOffset: { width: 0, height: 1 },

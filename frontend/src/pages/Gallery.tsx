@@ -10,20 +10,28 @@ import {
   TouchableOpacity,
   ScrollView,
   Pressable,
+  StyleSheet,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
-import Icon from "react-native-vector-icons/MaterialCommunityIcons"; 
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { globalStyles } from "../styles/styles";
-import { useClothing, deleteClothingItem, toggleFavoriteItem } from "../api/wardrobeService"; 
+import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import { useClothing, deleteClothingItem, toggleFavoriteItem } from "../api/wardrobeService";
 import type { ClothingItem } from "../api/wardrobeService";
+import StyledText from "../components/StyledText";
 
 const screenWidth = Dimensions.get("window").width;
 const imageSize = screenWidth / 3 - 10;
 
 const colorCategoryLabels: Record<number, string> = {
-  1: "Red", 2: "Orange", 3: "Yellow", 4: "Green", 5: "Blue",
-  6: "Purple", 7: "Pink", 8: "Brown", 998: "Beige", 999: "Grayscale"
+  1: "Red",
+  2: "Orange",
+  3: "Yellow",
+  4: "Green",
+  5: "Blue",
+  6: "Purple",
+  7: "Pink",
+  8: "Brown",
+  998: "Beige",
+  999: "Grayscale",
 };
 
 const styleOptionsMap: Record<string, string[]> = {
@@ -31,14 +39,14 @@ const styleOptionsMap: Record<string, string[]> = {
   Bottoms: ["Jeans", "Chinos", "Shorts", "Trousers", "Joggers", "Leggings", "Skirt"],
   Outerwear: ["Jacket", "Blazer", "Coat", "Vest", "Windbreaker", "Raincoat", "Hoodie", "Sweatshirt", "Sweater"],
   Footwear: ["Sneakers", "Boots", "Dress Shoes", "Loafers", "Sandals", "Heels"],
-  Accessories: ["Hat", "Belt", "Scarf", "Gloves", "Sunglasses", "Watch", "Tie"]
+  Accessories: ["Hat", "Belt", "Scarf", "Gloves", "Sunglasses", "Watch", "Tie"],
 };
 
 const allFilterOptions = {
   Texture: ["Cotton", "Denim", "Wool", "Linen", "Fleece", "Leather", "Suede"],
   Formality: ["Casual", "Business Casual", "Formal"],
   Size: ["XS", "S", "M", "L", "XL"],
-  Season: ["Summer", "Fall", "Winter", "Spring"]
+  Season: ["Summer", "Fall", "Winter", "Spring"],
 };
 
 function isGrayscale(r: number, g: number, b: number): boolean {
@@ -67,15 +75,16 @@ function hueCategory(hex: string): number {
   const lightness = (max + min) / 2;
   const saturation = delta === 0 ? 0 : delta / (1 - Math.abs(2 * lightness - 1));
 
-  if (hue >= 20 && hue < 50 && lightness >= 0.7 && delta <= 0.3) return 998;
-  if (hue >= 20 && hue < 50 && lightness >= 0.2 && lightness <= 0.55 && saturation >= 0.3) return 8;
-  if ((hue >= 0 && hue < 20) || hue >= 340) return 1;
-  if (hue >= 20 && hue < 40) return 2;
-  if (hue >= 40 && hue < 70) return 3;
-  if (hue >= 70 && hue < 170) return 4;
-  if (hue >= 170 && hue < 260) return 5;
-  if (hue >= 260 && hue < 300) return 6;
-  if (hue >= 300 && hue < 340) return 7;
+  // Color classification
+  if (hue >= 20 && hue < 50 && lightness >= 0.7 && delta <= 0.3) return 998;  // Beige-ish
+  if (hue >= 20 && hue < 50 && lightness >= 0.2 && lightness <= 0.55 && saturation >= 0.3) return 8; // Brown
+  if ((hue >= 0 && hue < 20) || hue >= 340) return 1; // Red
+  if (hue >= 20 && hue < 40) return 2; // Orange
+  if (hue >= 40 && hue < 70) return 3; // Yellow
+  if (hue >= 70 && hue < 170) return 4; // Green
+  if (hue >= 170 && hue < 260) return 5; // Blue
+  if (hue >= 260 && hue < 300) return 6; // Purple
+  if (hue >= 300 && hue < 340) return 7; // Pink
 
   return 998;
 }
@@ -83,7 +92,11 @@ function hueCategory(hex: string): number {
 const Gallery = () => {
   const { clothingItems, loading, error, fetchClothingItems } = useClothing();
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
+
+  // NEW: state for filter modal
   const [filterVisible, setFilterVisible] = useState(false);
+
+  // Filter states
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedColorCategories, setSelectedColorCategories] = useState<number[]>([]);
@@ -94,15 +107,10 @@ const Gallery = () => {
     fetchClothingItems();
   }, []);
 
+  // Filter items
   let filteredItems = clothingItems?.filter((item) => {
     const matchesType = selectedTypes.length === 0 || selectedTypes.includes(item.type);
-    const itemTags = [
-      item.style,
-      item.texture,
-      item.formality,
-      item.size,
-      ...(item.season || [])
-    ];
+    const itemTags = [item.style, item.texture, item.formality, item.size, ...(item.season || [])];
     const matchesTags = selectedTags.length === 0 || itemTags.some(tag => selectedTags.includes(tag));
     const matchesColor =
       selectedColorCategories.length === 0 ||
@@ -111,8 +119,9 @@ const Gallery = () => {
     return matchesType && matchesTags && matchesColor && matchesFavorites;
   });
 
+  // Sort items
   if (filteredItems) {
-    filteredItems = filteredItems.slice();
+    filteredItems = [...filteredItems];
     if (sortOrder === "newest") {
       filteredItems.reverse();
     } else if (sortOrder === "color") {
@@ -124,7 +133,11 @@ const Gallery = () => {
     }
   }
 
-  const toggleSelection = (value: string, selected: string[], setSelected: (val: string[]) => void) => {
+  const toggleSelection = (
+    value: string,
+    selected: string[],
+    setSelected: (val: string[]) => void
+  ) => {
     if (selected.includes(value)) {
       setSelected(selected.filter((v) => v !== value));
     } else {
@@ -132,32 +145,40 @@ const Gallery = () => {
     }
   };
 
-  const renderTagButtons = (tags: string[], selectedList: string[], setSelectedList: (val: string[]) => void) => (
-    <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-      {tags.map((tag) => (
-        <Pressable
-          key={tag}
-          onPress={() => toggleSelection(tag, selectedList, setSelectedList)}
-          style={{
-            padding: 8,
-            backgroundColor: selectedList.includes(tag) ? "#444" : "#ddd",
-            borderRadius: 8,
-            marginBottom: 8,
-            maxWidth: "30%"
-          }}
-        >
-          <Text style={{ color: selectedList.includes(tag) ? "#fff" : "#000", flexWrap: "wrap" }}>{tag}</Text>
-        </Pressable>
-      ))}
+  const renderTagButtons = (
+    tags: string[],
+    selectedList: string[],
+    setSelectedList: (val: string[]) => void
+  ) => (
+    <View style={styles.tagContainer}>
+      {tags.map(tag => {
+        const isSelected = selectedList.includes(tag);
+        return (
+          <Pressable
+            key={tag}
+            onPress={() => toggleSelection(tag, selectedList, setSelectedList)}
+            style={[
+              styles.tagButton,
+              isSelected ? styles.tagButtonSelected : styles.tagButtonUnselected
+            ]}
+          >
+            <Text style={isSelected ? styles.tagTextSelected : styles.tagTextUnselected}>
+              {tag}
+            </Text>
+          </Pressable>
+        );
+      })}
     </View>
   );
 
+  // Color category filter
   const renderColorCategoryButtons = () => {
     const selectedLabels = selectedColorCategories.map(c => colorCategoryLabels[c]);
+
     const toggleColor = (label: string) => {
-      const categoryEntry = Object.entries(colorCategoryLabels).find(([_, l]) => l === label);
-      if (!categoryEntry) return;
-      const [numStr] = categoryEntry;
+      const entry = Object.entries(colorCategoryLabels).find(([_, lbl]) => lbl === label);
+      if (!entry) return;
+      const [numStr] = entry;
       const num = parseInt(numStr);
       if (selectedColorCategories.includes(num)) {
         setSelectedColorCategories(selectedColorCategories.filter(c => c !== num));
@@ -167,22 +188,21 @@ const Gallery = () => {
     };
 
     return (
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+      <View style={styles.tagContainer}>
         {Object.entries(colorCategoryLabels).map(([numStr, label]) => {
-          const selected = selectedLabels.includes(label);
+          const isSelected = selectedLabels.includes(label);
           return (
             <Pressable
               key={label}
               onPress={() => toggleColor(label)}
-              style={{
-                padding: 8,
-                backgroundColor: selected ? "#444" : "#ddd",
-                borderRadius: 8,
-                marginBottom: 8,
-                maxWidth: "30%"
-              }}
+              style={[
+                styles.tagButton,
+                isSelected ? styles.tagButtonSelected : styles.tagButtonUnselected
+              ]}
             >
-              <Text style={{ color: selected ? "#fff" : "#000" }}>{label}</Text>
+              <Text style={isSelected ? styles.tagTextSelected : styles.tagTextUnselected}>
+                {label}
+              </Text>
             </Pressable>
           );
         })}
@@ -190,83 +210,92 @@ const Gallery = () => {
     );
   };
 
-  const renderFilterSection = () => {
-    const availableStyles = selectedTypes.length
-      ? selectedTypes.flatMap(type => styleOptionsMap[type] || [])
-      : [];
+  // Build the filter panel inside a bottom modal
+  const renderFilterModal = () => (
+    <Modal
+      visible={filterVisible}
+      animationType="slide"
+      transparent
+      onRequestClose={() => setFilterVisible(false)}
+    >
+      {/* Dismiss overlay */}
+      <Pressable style={styles.filterOverlay} onPress={() => setFilterVisible(false)} />
 
-    return (
-      <ScrollView style={{ padding: 10, backgroundColor: "#f5f5f5", maxHeight: 400 }} nestedScrollEnabled={true}>
-        <Text style={{ fontWeight: "bold" }}>Sort By</Text>
-        <Picker
-          selectedValue={sortOrder}
-          onValueChange={(val) => setSortOrder(val)}
-          style={{ backgroundColor: "#fff" }}
-        >
-          <Picker.Item label="Newest First" value="newest" />
-          <Picker.Item label="Oldest First" value="oldest" />
-          <Picker.Item label="Sort by Color" value="color" />
-        </Picker>
-
-        <View style={{ marginTop: 12 }}>
-          <Text style={{ fontWeight: "bold" }}>Type</Text>
-          {renderTagButtons(Object.keys(styleOptionsMap), selectedTypes, setSelectedTypes)}
-        </View>
-
-        {availableStyles.length > 0 && (
-          <View style={{ marginTop: 12 }}>
-            <Text style={{ fontWeight: "bold" }}>Style</Text>
-            {renderTagButtons(availableStyles, selectedTags, setSelectedTags)}
-          </View>
-        )}
-
-        {Object.entries(allFilterOptions).map(([category, tags]) => (
-          <View key={category} style={{ marginTop: 12 }}>
-            <Text style={{ fontWeight: "bold" }}>{category}</Text>
-            {renderTagButtons(tags, selectedTags, setSelectedTags)}
-          </View>
-        ))}
-
-        <View style={{ marginTop: 12 }}>
-          <Text style={{ fontWeight: "bold" }}>Color</Text>
-          {renderColorCategoryButtons()}
-        </View>
-
-        <View style={{ marginTop: 12 }}>
-          <Text style={{ fontWeight: "bold" }}>Favorites Only</Text>
-          <Pressable
-            onPress={() => setShowFavoritesOnly(!showFavoritesOnly)}
-            style={{
-              padding: 8,
-              backgroundColor: showFavoritesOnly ? "#444" : "#ddd",
-              borderRadius: 8,
-              marginTop: 6,
-              width: 120,
-              alignItems: "center"
-            }}
+      <View style={styles.bottomSheet}>
+        <ScrollView style={styles.filterScroll} nestedScrollEnabled>
+          <Text style={styles.filterTitle}>Sort By</Text>
+          <Picker
+            selectedValue={sortOrder}
+            onValueChange={(val) => setSortOrder(val)}
+            style={{ backgroundColor: "#fff" }}
           >
-            <Text style={{ color: showFavoritesOnly ? "#fff" : "#000" }}>
-              {showFavoritesOnly ? "Showing Favorites" : "Show Favorites"}
-            </Text>
-          </Pressable>
-        </View>
-      </ScrollView>
-    );
-  };
+            <Picker.Item label="Newest First" value="newest" />
+            <Picker.Item label="Oldest First" value="oldest" />
+            <Picker.Item label="Sort by Color" value="color" />
+          </Picker>
 
+          <View style={styles.filterSection}>
+            <Text style={styles.filterTitle}>Type</Text>
+            {renderTagButtons(Object.keys(styleOptionsMap), selectedTypes, setSelectedTypes)}
+          </View>
+
+          {/* Style field depends on selected type */}
+          {selectedTypes.length > 0 && (
+            <View style={styles.filterSection}>
+              <Text style={styles.filterTitle}>Style</Text>
+              {renderTagButtons(
+                selectedTypes.flatMap(t => styleOptionsMap[t] || []),
+                selectedTags,
+                setSelectedTags
+              )}
+            </View>
+          )}
+
+          {/* Additional categories */}
+          {Object.entries(allFilterOptions).map(([category, tags]) => (
+            <View key={category} style={styles.filterSection}>
+              <Text style={styles.filterTitle}>{category}</Text>
+              {renderTagButtons(tags, selectedTags, setSelectedTags)}
+            </View>
+          ))}
+
+          <View style={styles.filterSection}>
+            <Text style={styles.filterTitle}>Color</Text>
+            {renderColorCategoryButtons()}
+          </View>
+
+          <View style={styles.filterSection}>
+            <Text style={styles.filterTitle}>Favorites Only</Text>
+            <Pressable
+              onPress={() => setShowFavoritesOnly(!showFavoritesOnly)}
+              style={[
+                styles.favoritesToggle,
+                { backgroundColor: showFavoritesOnly ? "#444" : "#ddd" }
+              ]}
+            >
+              <Text style={{ color: showFavoritesOnly ? "#fff" : "#000" }}>
+                {showFavoritesOnly ? "Showing Favorites" : "Show Favorites"}
+              </Text>
+            </Pressable>
+          </View>
+
+          <TouchableOpacity
+            style={styles.closeFilterButton}
+            onPress={() => setFilterVisible(false)}
+          >
+            <Text style={styles.closeFilterButtonText}>Done</Text>
+          </TouchableOpacity>
+          <View style={{ height: 32 }} /> 
+        </ScrollView>
+      </View>
+    </Modal>
+  );
+
+  // Render each clothing item in the grid
   const renderItem = ({ item }: { item: ClothingItem }) => (
-    <View style={{ width: imageSize, height: imageSize, padding: 2 }}>
+    <View style={styles.imageSizeContainer}>
       <TouchableOpacity onPress={() => setSelectedItem(item)}>
-        <Image
-          source={{ uri: item.imageUrl }}
-          style={{
-            width: "100%",
-            height: "100%",
-            resizeMode: "cover",
-            borderRadius: 5,
-            backgroundColor: "#eee",
-          }}
-        />
+        <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
       </TouchableOpacity>
       <TouchableOpacity
         onPress={async () => {
@@ -277,14 +306,7 @@ const Gallery = () => {
             console.error("Failed to toggle favorite:", err);
           }
         }}
-        style={{
-          position: "absolute",
-          right: 6,
-          top: 6,
-          backgroundColor: "rgba(255,255,255,0.8)",
-          padding: 4,
-          borderRadius: 20,
-        }}
+        style={styles.favoriteButton}
       >
         <MaterialCommunityIcons
           name={item.favorite ? "heart" : "heart-outline"}
@@ -296,73 +318,46 @@ const Gallery = () => {
   );
 
   return (
-    <View style={{ flex: 1 }}>
+    <View style={styles.container}>
+      {/* Header */}
+      <View style={{ paddingTop: 40, paddingBottom: 10, alignItems: "center" }}>
+        <StyledText size={32} variant="title">Gallery View</StyledText>
+      </View>
+
+      {/* Main content: List of items */}
       <FlatList
         data={filteredItems}
         keyExtractor={(item) => item._id}
         numColumns={3}
         renderItem={renderItem}
-        ListHeaderComponent={
-          <View style={{ marginTop: 50, marginBottom: 10 }}>
-            <Pressable
-              onPress={() => setFilterVisible((prev) => !prev)}
-              style={{ padding: 12, backgroundColor: "#ccc", alignItems: "center" }}
-            >
-              <Text style={{ fontWeight: "bold" }}>Toggle Filters</Text>
-            </Pressable>
-            {filterVisible && renderFilterSection()}
-          </View>
-        }
-        contentContainerStyle={{ paddingTop: 10, paddingBottom: 20, paddingHorizontal: 5 }}
+        contentContainerStyle={styles.flatListContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
-        nestedScrollEnabled={true}
+        nestedScrollEnabled
       />
+      
+      {/* Floating filter button */}
+      <TouchableOpacity
+        style={styles.floatingFilterButton}
+        onPress={() => setFilterVisible(true)}
+      >
+        <MaterialCommunityIcons name="filter" size={28} color="#fff" />
+      </TouchableOpacity>
 
+      {/* Fullscreen item detail modal */}
       <Modal
         visible={selectedItem != null}
         animationType="slide"
         transparent={false}
         onRequestClose={() => setSelectedItem(null)}
       >
-        <SafeAreaView style={{ flex: 1, backgroundColor: "black" }}>
-          <ScrollView
-            style={{ flex: 1, width: "100%" }}
-            contentContainerStyle={{
-              flexGrow: 1,
-              justifyContent: "center",
-              alignItems: "center",
-              padding: 20,
-            }}
-          >
+        <SafeAreaView style={styles.modalSafeArea}>
+          <ScrollView style={styles.modalScroll} contentContainerStyle={styles.modalScrollContent}>
             {selectedItem && (
               <>
-                <Image
-                  source={{ uri: selectedItem.imageUrl }}
-                  style={{
-                    width: "90%",
-                    height: 320,
-                    resizeMode: "cover",
-                    borderRadius: 12,
-                    marginBottom: 24,
-                    backgroundColor: "#ccc",
-                  }}
-                />
+                <Image source={{ uri: selectedItem.imageUrl }} style={styles.modalImage} />
 
-                <View
-                  style={{
-                    backgroundColor: "#fff",
-                    borderRadius: 12,
-                    paddingVertical: 16,
-                    paddingHorizontal: 20,
-                    width: "90%",
-                    shadowColor: "#000",
-                    shadowOffset: { width: 0, height: 1 },
-                    shadowOpacity: 0.1,
-                    shadowRadius: 2,
-                    elevation: 3,
-                  }}
-                >
+                <View style={styles.modalInfoCard}>
                   {(() => {
                     const builtTags: Record<string, string> = {
                       type: selectedItem.type,
@@ -377,44 +372,30 @@ const Gallery = () => {
                     };
 
                     return Object.entries(builtTags).map(([key, value]) => (
-                      <Text key={key} style={{ fontSize: 16, marginBottom: 6 }}>
-                          <Text style={{ fontWeight: "600", color: "#333" }}>{key}:</Text>{" "}
-                          <Text style={{ color: "#444" }}>{value}</Text>
-                        </Text>
-                      ));
-                    })()}
-                  </View>
-                  
-                  <TouchableOpacity
-                    onPress={async () => {
-                      try {
-                        await deleteClothingItem(selectedItem._id);
-                        setSelectedItem(null);
-                        fetchClothingItems(); // Refresh the gallery after deletion
-                      } catch (err) {
-                        console.error("Error deleting item:", err);
-                      }
-                    }}
-                    style={{
-                      marginTop: 20,
-                      backgroundColor: "#ff5555",
-                      paddingHorizontal: 20,
-                      paddingVertical: 10,
-                      borderRadius: 8,
-                    }}
-                  >
-                    <Text style={{ color: "#fff", fontWeight: "bold" }}>Delete Item</Text>
-                  </TouchableOpacity>
+                      <Text key={key} style={styles.modalLine}>
+                        <Text style={styles.modalKey}>{key}:</Text>{" "}
+                        <Text style={styles.modalValue}>{value}</Text>
+                      </Text>
+                    ));
+                  })()}
+                </View>
 
-                <Text
-                  onPress={() => setSelectedItem(null)}
-                  style={{
-                    color: "#ccc",
-                    fontSize: 16,
-                    marginTop: 30,
-                    textDecorationLine: "underline",
+                <TouchableOpacity
+                  onPress={async () => {
+                    try {
+                      await deleteClothingItem(selectedItem._id);
+                      setSelectedItem(null);
+                      fetchClothingItems();
+                    } catch (err) {
+                      console.error("Error deleting item:", err);
+                    }
                   }}
+                  style={styles.deleteButton}
                 >
+                  <Text style={styles.deleteButtonText}>Delete Item</Text>
+                </TouchableOpacity>
+
+                <Text onPress={() => setSelectedItem(null)} style={styles.closeText}>
                   Close
                 </Text>
               </>
@@ -422,8 +403,196 @@ const Gallery = () => {
           </ScrollView>
         </SafeAreaView>
       </Modal>
+
+      {/* Bottom filter modal (slide-up) */}
+      {renderFilterModal()}
     </View>
   );
 };
 
 export default Gallery;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  flatListContent: {
+    paddingBottom: 35,
+    paddingHorizontal: 5,
+  },
+  imageSizeContainer: {
+    width: imageSize,
+    height: imageSize,
+    padding: 2,
+  },
+  itemImage: {
+    width: "100%",
+    height: "100%",
+    resizeMode: "cover",
+    borderRadius: 5,
+    backgroundColor: "#eee",
+  },
+  favoriteButton: {
+    position: "absolute",
+    right: 6,
+    top: 6,
+    backgroundColor: "rgba(255,255,255,0.8)",
+    padding: 4,
+    borderRadius: 20,
+  },
+
+  // Floating filter button (circular)
+  floatingFilterButton: {
+    position: "absolute",
+    bottom: 24,
+    right: 24,
+    backgroundColor: "#3F342E", // coffee-brown background
+    padding: 16,
+    borderRadius: 50,
+    elevation: 5,
+  },
+
+  // Filter modal overlay
+  filterOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.3)",
+  },
+
+  // Bottom sheet container
+  bottomSheet: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "#2D2D2D",
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    maxHeight: "70%",
+    elevation: 10,
+  },
+  filterScroll: {
+    padding: 16,
+    paddingBottom: 80,
+  },
+  filterTitle: {
+    fontWeight: "bold",
+    marginBottom: 4,
+    color: "#DDD",
+    fontSize: 16,
+  },
+  filterSection: {
+    marginTop: 12,
+  },
+  favoritesToggle: {
+    padding: 8,
+    borderRadius: 8,
+    marginTop: 6,
+    width: 120,
+    alignItems: "center",
+  },
+  tagContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+    marginTop: 4,
+  },
+  tagButton: {
+    backgroundColor: "#3F342E",
+    padding: 8,
+    borderRadius: 8,
+    marginBottom: 8,
+    maxWidth: "30%",
+  },
+  tagButtonSelected: {
+    backgroundColor: "#6C6A67",
+  },
+  tagButtonUnselected: {
+    backgroundColor: "#3F342E",
+  },
+  tagTextSelected: {
+    color: "#DDD",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  tagTextUnselected: {
+    color: "#DDD",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  closeFilterButton: {
+    marginTop: 20,
+    padding: 12,
+    backgroundColor: "#6C6A67",
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  closeFilterButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+
+  // Item detail modal
+  modalSafeArea: {
+    flex: 1,
+    backgroundColor: "black",
+  },
+  modalScroll: {
+    flex: 1,
+    width: "100%",
+    
+  },
+  modalScrollContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalImage: {
+    width: "90%",
+    height: 320,
+    resizeMode: "cover",
+    borderRadius: 12,
+    marginBottom: 24,
+    backgroundColor: "#ccc",
+  },
+  modalInfoCard: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    width: "90%",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 3,
+  },
+  modalLine: {
+    fontSize: 16,
+    marginBottom: 6,
+  },
+  modalKey: {
+    fontWeight: "600",
+    color: "#333",
+  },
+  modalValue: {
+    color: "#444",
+  },
+  deleteButton: {
+    marginTop: 20,
+    backgroundColor: "#ff5555",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+  },
+  deleteButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  closeText: {
+    color: "#DDD",
+    fontSize: 16,
+    marginTop: 30,
+    textDecorationLine: "underline",
+  },
+});

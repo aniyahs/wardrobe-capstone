@@ -16,6 +16,7 @@ import GradientButton from "../components/GradientButton";
 import { Picker } from "@react-native-picker/picker";
 import  ColorPicker  from "react-native-wheel-color-picker";
 import { predictTags } from "../api/predictService";
+import StyledText from "../components/StyledText";
 
 
 const PhotoUpload = () => {
@@ -290,177 +291,171 @@ const PhotoUpload = () => {
   );    
 
   return (
+    <><View style={{ paddingTop: 40, alignItems: "center" }}>
+      <StyledText size={32} variant="title">Photo Upload</StyledText>
+    </View>
     <View style={globalStyles.container}>
-      {!selectedImage && !isUploading && (
-        <GradientButton
-          title="Upload a Photo"
-          subtitle="Select from Camera Roll"
-          onPress={handleSelectPhoto}
-        />
-      )}
+        {!selectedImage && !isUploading && (
+          <GradientButton
+            title="Upload a Photo"
+            subtitle="Select from Camera Roll"
+            onPress={handleSelectPhoto} />
+        )}
 
-      {isUploading && (
-        <ActivityIndicator size="large" color="#5EB0E5" style={{ marginTop: 24 }} />
-      )}
+        {isUploading && (
+          <ActivityIndicator size="large" color="#5EB0E5" style={{ marginTop: 24 }} />
+        )}
 
-      {selectedImage && !isUploading && (
-        <>
-          <Image source={{ uri: selectedImage }} style={globalStyles.imagePreview} />
+        {selectedImage && !isUploading && (
+          <>
+            <Image source={{ uri: selectedImage }} style={globalStyles.imagePreview} />
 
-          {/* Color Picker */}
-          {step === "color" ? (
-            <>
-              <View style={{ alignItems: "center", marginTop: 30 }}>
-                <Text style={{ color: "#DDD", fontSize: 16, fontWeight: "bold", marginBottom: 12 }}>
-                  Pick a Color
-                </Text>
-                <View style={{ height: 250, width: 250 }}>
-                <ColorPicker
-                  color={selectedHexColor}
-                  onColorChange={setSelectedHexColor}
-                  thumbSize={30}
-                  sliderSize={30}
-                  noSnap={true}
-                  row={false}
-                  swatches={true}
-                  swatchesLast={true}
-                  discrete={false} // use smooth slider
-                  autoResetSlider={false} // keep current lightness when moving on wheel
-                  shadeWheelThumb={true} // show thumb color on the wheel
-                  shadeSliderThumb={true} // show thumb color on the slider
-                  useNativeDriver={true} // for better performance
-                  palette={[
-                    "#fdf6e3",
-                    "#f5e8d0",
-                    "#e9d5b8",
-                    "#d4bda0",
-                    "#c1a78c",
-                    "#a98977",
-                    "#92735e",
-                    "#7c5c45",
-                  ]}
-                />
-                </View>
-              </View>
-              
-              <View style={{ marginTop: 30 }}>
-                <GradientButton
-                  title="Next"
-                  onPress={async () => {
-                    updatePickerValue(2, selectedHexColor);
-                    await handleUpload();
-                  }}
-                  size="medium"
-                />
-              </View>
-            </>
-          ) : (
-            <>
-            {/* Season Picker */}
-              <View style={styles.multiSelectContainer}>
-                <View style={styles.seasonOptions}>
-                  {["Summer", "Fall", "Winter", "Spring"].map(season => (
-                    <View key={season} style={styles.seasonShadowWrapper}>
-                      <View style={styles.dropShadowSmall} />
-                      <Text
-                        style={[
-                          styles.seasonOption,
-                          selectedSeason.includes(season) && styles.seasonSelected,
-                        ]}
-                        onPress={() => toggleSeason(season)}
-                      >
-                        {season}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              </View>
-
-              {/* DropDowns: Type / Style / Size */}
-              <View style={styles.dropdownGrid}>
-                <View style={styles.dropdownColumn}>
-                  {/* Type */}
-                  <Dropdown
-                    label="Type"
-                    options={Object.keys(typeToStylesMap)}
-                    value={selectedType}
-                    onChange={value => {
-                      setSelectedType(value);
-                      updatePickerValue(0, value);
-
-                      // Auto-set style to first style of selected type
-                      const stylesForType = typeToStylesMap[value];
-                      if (stylesForType && stylesForType.length > 0) {
-                        updatePickerValue(1, stylesForType[0]);
-                      }
-                    }}
-                  />
-
-<Dropdown
-  label="Style"
-  options={typeToStylesMap[selectedType] || []}
-  value={pickerValues[1]}
-  onChange={value => {
-    const info = styleInfoMap[value];
-    const updated = [...pickerValues];
-    updated[1] = value;
-    if (info) {
-      updated[3] = info.texture;
-      updated[5] = info.formality;
-    }
-    setPickerValues(updated);
-  }}
-/>
-
-                  {/* Size */}
-                  {selectedType !== "Accessories" && (
-                    <Dropdown
-                      label="Size"
-                      options={["XS", "S", "M", "L", "XL"]}
-                      value={pickerValues[6]}
-                      onChange={value => updatePickerValue(6, value)}
-                  />
-                )}
-                </View>
-
-                {/* Texture, Formality, Favorite */}
-                <View style={styles.dropdownColumn}>
-                  <Dropdown
-                    label="Formality"
-                    options={["Casual", "Business Casual", "Formal"]}
-                    value={pickerValues[5]}
-                    onChange={value => updatePickerValue(5, value)}
-                  />
-                  <Dropdown
-                    label="Favorite"
-                    options={["Yes", "No"]}
-                    value={pickerValues[8]}
-                    onChange={value => updatePickerValue(8, value)}
-                  />
-
-                  {selectedType !== "Accessories" && (
-                    <Dropdown
-                      label="Texture"
-                      options={["Cotton", "Denim", "Wool", "Linen", "Fleece", "Leather", "Suede"]}
-                      value={pickerValues[3]}
-                      onChange={value => updatePickerValue(3, value)}
-                    />
-                  )}
+            {/* Color Picker */}
+            {step === "color" ? (
+              <>
+                <View style={{ alignItems: "center", marginTop: 30 }}>
+                  <Text style={{ color: "#DDD", fontSize: 16, fontWeight: "bold", marginBottom: 12 }}>
+                    Pick a Color
+                  </Text>
+                  <View style={{ height: 250, width: 250 }}>
+                    <ColorPicker
+                      color={selectedHexColor}
+                      onColorChange={setSelectedHexColor}
+                      thumbSize={30}
+                      sliderSize={30}
+                      noSnap={true}
+                      row={false}
+                      swatches={true}
+                      swatchesLast={true}
+                      discrete={false} // use smooth slider
+                      autoResetSlider={false} // keep current lightness when moving on wheel
+                      shadeWheelThumb={true} // show thumb color on the wheel
+                      shadeSliderThumb={true} // show thumb color on the slider
+                      useNativeDriver={true} // for better performance
+                      palette={[
+                        "#fdf6e3",
+                        "#f5e8d0",
+                        "#e9d5b8",
+                        "#d4bda0",
+                        "#c1a78c",
+                        "#a98977",
+                        "#92735e",
+                        "#7c5c45",
+                      ]} />
                   </View>
                 </View>
 
-              <View style={{ marginTop: 20 }}>
-                <GradientButton title="Upload" onPress={() => {
-                  if (!isUploading) {
-                    handleSave();
-                  }
-                }} size="medium" />
-              </View>
-            </>
-          )}
-        </>
-      )}
-    </View>
+                <View style={{ marginTop: 30 }}>
+                  <GradientButton
+                    title="Next"
+                    onPress={async () => {
+                      updatePickerValue(2, selectedHexColor);
+                      await handleUpload();
+                    } }
+                    size="medium" />
+                </View>
+              </>
+            ) : (
+              <>
+                {/* Season Picker */}
+                <View style={styles.multiSelectContainer}>
+                  <View style={styles.seasonOptions}>
+                    {["Summer", "Fall", "Winter", "Spring"].map(season => (
+                      <View key={season} style={styles.seasonShadowWrapper}>
+                        <View style={styles.dropShadowSmall} />
+                        <Text
+                          style={[
+                            styles.seasonOption,
+                            selectedSeason.includes(season) && styles.seasonSelected,
+                          ]}
+                          onPress={() => toggleSeason(season)}
+                        >
+                          {season}
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                </View>
+
+                {/* DropDowns: Type / Style / Size */}
+                <View style={styles.dropdownGrid}>
+                  <View style={styles.dropdownColumn}>
+                    {/* Type */}
+                    <Dropdown
+                      label="Type"
+                      options={Object.keys(typeToStylesMap)}
+                      value={selectedType}
+                      onChange={value => {
+                        setSelectedType(value);
+                        updatePickerValue(0, value);
+
+                        // Auto-set style to first style of selected type
+                        const stylesForType = typeToStylesMap[value];
+                        if (stylesForType && stylesForType.length > 0) {
+                          updatePickerValue(1, stylesForType[0]);
+                        }
+                      } } />
+
+                    <Dropdown
+                      label="Style"
+                      options={typeToStylesMap[selectedType] || []}
+                      value={pickerValues[1]}
+                      onChange={value => {
+                        const info = styleInfoMap[value];
+                        const updated = [...pickerValues];
+                        updated[1] = value;
+                        if (info) {
+                          updated[3] = info.texture;
+                          updated[5] = info.formality;
+                        }
+                        setPickerValues(updated);
+                      } } />
+
+                    {/* Size */}
+                    {selectedType !== "Accessories" && (
+                      <Dropdown
+                        label="Size"
+                        options={["XS", "S", "M", "L", "XL"]}
+                        value={pickerValues[6]}
+                        onChange={value => updatePickerValue(6, value)} />
+                    )}
+                  </View>
+
+                  {/* Texture, Formality, Favorite */}
+                  <View style={styles.dropdownColumn}>
+                    <Dropdown
+                      label="Formality"
+                      options={["Casual", "Business Casual", "Formal"]}
+                      value={pickerValues[5]}
+                      onChange={value => updatePickerValue(5, value)} />
+                    <Dropdown
+                      label="Favorite"
+                      options={["Yes", "No"]}
+                      value={pickerValues[8]}
+                      onChange={value => updatePickerValue(8, value)} />
+
+                    {selectedType !== "Accessories" && (
+                      <Dropdown
+                        label="Texture"
+                        options={["Cotton", "Denim", "Wool", "Linen", "Fleece", "Leather", "Suede"]}
+                        value={pickerValues[3]}
+                        onChange={value => updatePickerValue(3, value)} />
+                    )}
+                  </View>
+                </View>
+
+                <View style={{ marginTop: 20 }}>
+                  <GradientButton title="Upload" onPress={() => {
+                    if (!isUploading) {
+                      handleSave();
+                    }
+                  } } size="medium" />
+                </View>
+              </>
+            )}
+          </>
+        )}
+      </View></>
   );
 };
 

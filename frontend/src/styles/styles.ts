@@ -100,7 +100,6 @@ export const globalStyles = StyleSheet.create({
   // Image Styling
   imageContainer: {
     flex: 1,
-    padding: 5,
     alignItems: "center",
   },
   image: {
@@ -112,7 +111,6 @@ export const globalStyles = StyleSheet.create({
     width: 200,
     height: 200,
     borderRadius: 10,
-    marginTop: 20,
   },
 
   // Alert Input Fields

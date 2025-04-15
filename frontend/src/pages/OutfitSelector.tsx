@@ -42,21 +42,24 @@ const OutfitGeneratorScreen = () => {
         await fetchClothingItems(); // Fetch again if not loaded
       }
 
+      const payload = {
+        season,
+        formality,
+        clothingItems,
+        temperature: weather?.temperature,
+        weathercode: weather?.weathercode,
+        userId,
+      };
+
       axios
-        .post('http://10.0.2.2:5001/outfit/generate-outfit', {
-          season,
-          formality,
-          clothingItems, // this is from context
-          temperature: weather?.temperature,
-          weathercode: weather?.weathercode,
-          userId,
-        })
+        .post('http://10.0.2.2:5001/outfit/generate-outfit', payload)
         .then(response => {
           // The backend returns an array of wardrobe items
           setOutfit(response.data);
         })
         .catch(error => {
-          console.error('Error generating outfit:', error);
+          console.error("❌ Axios error:", error.response?.data || error.message);
+          console.log("🕵️‍♂️ Payload that caused error:", JSON.stringify(payload, null, 2));
         })
         .finally(() => setLoading(false));
     } catch (error) {
@@ -91,7 +94,10 @@ const OutfitGeneratorScreen = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.mainContainer}>
-      <StyledText size={24} variant="title">Outfit Generator</StyledText>
+      <View style={{ paddingTop: 20, marginBottom: 10 }}>
+        <StyledText size={32} variant="title">Outfit Generator</StyledText>
+      </View>
+      
       <Weather onWeatherFetched={(w) => setWeather(w)} />
 
       <View style={{ alignItems: "center", marginBottom: 10 }}>
