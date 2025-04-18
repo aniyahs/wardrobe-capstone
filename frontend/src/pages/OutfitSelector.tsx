@@ -98,7 +98,7 @@ const OutfitGeneratorScreen = () => {
         <StyledText size={32} variant="title">Outfit Generator</StyledText>
       </View>
       
-      <Weather onWeatherFetched={(w) => setWeather(w)} />
+      {/*<Weather onWeatherFetched={(w) => setWeather(w)} />*/}
 
       <View style={{ alignItems: "center", marginBottom: 10 }}>
         <View style={styles.dropShadow} />
@@ -220,25 +220,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginBottom: 20,
-    borderWidth: 1,
-    borderColor: "#ccc",
     borderRadius: 10,
     padding: 10,
+    backgroundColor: "#3F342E",
   },
   image: {
     width: 100,
     height: 100,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
+    backgroundColor: "#3F342E",
   },
   itemInfo: {
     marginLeft: 10,
     flexShrink: 1,
+    backgroundColor: "#3F342E",
+    
   },
   itemText: {
     fontWeight: 'bold',
     marginBottom: 2,
+    color: "#DDD",
   },
 });
 

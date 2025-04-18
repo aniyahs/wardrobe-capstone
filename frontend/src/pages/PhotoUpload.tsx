@@ -26,6 +26,7 @@ const PhotoUpload = () => {
   const [pickerValues, setPickerValues] = useState<string[]>(Array(9).fill(""));
   const [selectedHexColor, setSelectedHexColor] = useState<string>("#000000");
   const [step, setStep] = useState<"color" | "tags">("color");
+  const [remoteUrl, setRemoteUrl] = useState<string | null>(null);
   
 
   const styleInfoMap: Record<
@@ -154,6 +155,7 @@ const PhotoUpload = () => {
     try {
       console.log("📤 Uploading image to Firebase...");
       const downloadUrl = await uploadImageToStorage(selectedImage);
+      setRemoteUrl(downloadUrl);
       console.log("✅ Image uploaded! Download URL:", downloadUrl);
 
       const userId = await getCurrentUserId();
@@ -169,7 +171,7 @@ const PhotoUpload = () => {
       //setIsPredicting(false);
 
       const predictedStyle = predictedTags.type || "T-Shirt";   
-      const colorValue = predictedTags.color || "#000000";
+      //const colorValue = predictedTags.color || "#000000";
       const patternValue = predictedTags.pattern || "Solid";
 
       console.log("🛠️ Setting predicted values...");
@@ -193,7 +195,7 @@ const PhotoUpload = () => {
         const updated = [...prev];
         updated[0] = mappedType;
         updated[1] = matchedStyle;
-        updated[2] = colorValue;
+        updated[2] = selectedHexColor;
         updated[3] = autoTexture;      // ⬅️ From styleInfoMap
         updated[5] = autoFormality;    // ⬅️ From styleInfoMap
         updated[6] = "M";
@@ -241,7 +243,7 @@ const PhotoUpload = () => {
 
       const itemData = {
         userId,
-        photoUrl: selectedImage,
+        photoUrl: remoteUrl,
         type: pickerValues[0],
         style: pickerValues[1],
         color: pickerValues[2],
