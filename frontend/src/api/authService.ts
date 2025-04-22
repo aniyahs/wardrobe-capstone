@@ -1,13 +1,21 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export const storeUserId = async (userId: string) => {
-  await AsyncStorage.setItem("userId", userId);
+    try {
+        await AsyncStorage.setItem("userId", userId);
+    } catch (error) {
+        console.error("Failed to store user ID:", error);
+    }
 };
 
 export const getCurrentUserId = async (): Promise<string | null> => {
-    return await AsyncStorage.getItem("userId");
-  };
-
+    try {
+        return await AsyncStorage.getItem("userId");
+    } catch (error) {
+        console.error("Failed to get user ID:", error);
+        return null;
+  }
+};
 
 export const loginUser = async (email: string, password: string) => {
   try {
@@ -56,4 +64,3 @@ export const signupUser = async (username: string, email: string, password: stri
       }
   }
 };
-
