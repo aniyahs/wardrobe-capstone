@@ -1,90 +1,146 @@
-import React, { useState } from "react";
-import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet } from "react-native";
-// Need to adjust stylesheet
-//import { globalStyles } from "../styles/styles";
-
-// Fake clothing data (normally would come from a database)
-const clothingData = [
-  { id: "1", name: "Blue Jeans", wears: 25, cost: 40 },
-  { id: "2", name: "White T-Shirt", wears: 50, cost: 15 },
-  { id: "3", name: "Red Hoodie", wears: 10, cost: 60 },
-  { id: "4", name: "Sneakers", wears: 80, cost: 100 },
-  { id: "5", name: "Leather Jacket", wears: 5, cost: 120 },
-  { id: "6", name: "Black Pants", wears: 15, cost: 35 },
-];
-
-// Sort items based on wear count
-const mostWorn = [...clothingData].sort((a, b) => b.wears - a.wears)[0];
-const leastWorn = [...clothingData].sort((a, b) => a.wears - b.wears)[0];
-
-// Fake frequently paired pieces (just an example)
-const frequentlyPaired = ["White T-Shirt & Blue Jeans", "Sneakers & Black Pants"];
+import React, { useState, useEffect } from "react";
+import { getCurrentUserId } from "../api/authService";
+import { View, Text, FlatList, TouchableOpacity, TextInput, StyleSheet, ScrollView, Image } from "react-native";
 
 // Calculate cost-per-wear
 const calculateCPW = (item: { wears: number; cost: number }) => (item.wears > 0 ? (item.cost / item.wears).toFixed(2) : "N/A");
 
 // State for alert settings
 const Profile = () => {
-  const [alerts, setAlerts] = useState<{ [key: string]: string }>({});
-
-  const setAlertForItem = (id: string, days: string) => {
-    setAlerts((prev) => ({ ...prev, [id]: days }));
+  const [analytics, setAnalytics] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [expandedSections, setExpandedSections] = useState<string[]>([]);
+  
+  const toggleSection = (key: string) => {
+    setExpandedSections((prev) =>
+      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
+    );
   };
 
+  useEffect(() => {
+    const fetchAnalytics = async () => {
+      try {
+        const userId = await getCurrentUserId();
+        const response = await fetch(`http://10.0.2.2:5001/outfit/analytics?userId=${userId}`);
+        const contentType = response.headers.get("Content-Type");
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(`Backend error: ${response.status} — ${text}`);
+        }
+  
+        if (!contentType || !contentType.includes("application/json")) {
+          const text = await response.text();
+          throw new Error(`Expected JSON, got: ${text.substring(0, 100)}`);
+        }
+        
+        const data = await response.json();
+        setAnalytics(data);
+      } catch (err) {
+        console.error("Failed to fetch analytics:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAnalytics();
+  }, []);
+  
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <Text>Loading analytics...</Text>
+      </View>
+    );
+  }  
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Clothing Analytics</Text>
+    
+<ScrollView style={styles.pageWrapper} contentContainerStyle={styles.container}>
+  <Text style={styles.title}>Clothing Analytics</Text>
 
-      {/* Most & Least Worn Items */}
-      <Text style={styles.subtitle}>Most Worn: {mostWorn.name} ({mostWorn.wears} wears)</Text>
-      <Text style={styles.subtitle}>Least Worn: {leastWorn.name} ({leastWorn.wears} wears)</Text>
-
-      {/* Frequently Paired Pieces */}
-      <Text style={styles.sectionTitle}>Frequently Paired Pieces</Text>
-      {frequentlyPaired.map((pair, index) => (
-        <Text key={index} style={styles.listItem}>{pair}</Text>
-      ))}
-
-      {/* Cost-Per-Wear */}
-      <Text style={styles.sectionTitle}>Cost-Per-Wear</Text>
-      <FlatList
-        data={clothingData}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <Text style={styles.listItem}>
-            {item.name}: ${calculateCPW(item)} per wear
-          </Text>
-        )}
-      />
-
-      {/* Alert Settings */}
-      <Text style={styles.sectionTitle}>Set Alerts for Underused Items</Text>
-      {clothingData.map((item) => (
-        <View key={item.id} style={styles.alertContainer}>
-          <Text>{item.name}</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Days"
-            keyboardType="numeric"
-            onChangeText={(text) => setAlertForItem(item.id, text)}
-            value={alerts[item.id] || ""}
-          />
-          <TouchableOpacity
-            style={styles.alertButton}
-            // onPress={() => alert(`Alert set for ${item.name} if not worn in ${alerts[item.id] || "0"} days`)}
-          >
-            <Text style={styles.alertButtonText}>Set Alert</Text>
-          </TouchableOpacity>
+    {/* Most Worn Items */}
+    <TouchableOpacity onPress={() => toggleSection("mostWorn")}>
+      <Text style={styles.sectionTitle}>
+        {expandedSections.includes("mostWorn") ? "▼ " : "▶ "} Most Worn (by Type)
+      </Text>
+    </TouchableOpacity>
+    {expandedSections.includes("mostWorn") && (
+      analytics && Object.entries(analytics.mostWornByType).map(([type, items]: [string, any]) => (
+        <View key={type} style={{ marginBottom: 10 }}>
+          <Text style={styles.subtitle}>{type}</Text>
+          <ScrollView style={styles.itemScroll} nestedScrollEnabled>
+            {items.map((item: any) => (
+              <View key={item._id} style={styles.itemRow}>
+                <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
+                <View style={styles.itemInfo}>
+                  <Text style={styles.listItem}>{item.style || item.type}</Text>
+                  <Text style={styles.listItem}>{item.wearCount} wear{item.wearCount !== 1 ? "s" : ""}</Text>
+                </View>
+              </View>
+            ))}
+          </ScrollView>
         </View>
-      ))}
-    </View>
+      ))
+    )}
+
+    {/* Most worn colors */}
+    <TouchableOpacity onPress={() => toggleSection("colors")}>
+      <Text style={styles.sectionTitle}>
+        {expandedSections.includes("colors") ? "▼ " : "▶ "} Most Used Colors (by Type)
+      </Text>
+    </TouchableOpacity>
+    {expandedSections.includes("colors") && (
+      analytics && Object.entries(analytics.mostUsedColors).map(([type, colorMap]: [string, any]) => (
+        <View key={type}>
+          <Text style={styles.subtitle}>{type}</Text>
+          {Object.entries(colorMap as Record<string, number>).map(([color, count]) => (
+            <Text key={color} style={styles.listItem}>
+              {color}: {count} times
+            </Text>
+          ))}
+        </View>
+      ))
+    )}
+
+    {/* Season Usage */}
+    <TouchableOpacity onPress={() => toggleSection("seasons")}>
+      <Text style={styles.sectionTitle}>
+        {expandedSections.includes("seasons") ? "▼ " : "▶ "} Items by Season
+      </Text>
+    </TouchableOpacity>
+    {expandedSections.includes("seasons") && (
+      analytics && Object.entries(analytics.seasonUsage as Record<string, number>).map(([season, count]) => (
+        <Text key={season} style={styles.listItem}>
+          {season}: {count} outfit(s)
+        </Text>
+      ))
+    )}
+
+      {/* Unused items */}
+      <TouchableOpacity onPress={() => toggleSection("unworn")}>
+      <Text style={styles.sectionTitle}>
+        {expandedSections.includes("unworn") ? "▼ " : "▶ "} Items You Haven’t Worn Yet
+      </Text>
+    </TouchableOpacity>
+    {expandedSections.includes("unworn") && (
+      analytics && analytics.unwornItems.length > 0 ? (
+        analytics.unwornItems.map((item: any) => (
+          <Text key={item._id} style={styles.listItem}>
+            {item.style || item.type}
+          </Text>
+        ))
+      ) : (
+        <Text style={styles.listItem}>All items have been used — nice job!</Text>
+      )
+    )}
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
     padding: 20,
+    paddingBottom: 80, 
     backgroundColor: "#f5f5f5",
     marginBottom: 60,
     marginTop: 40,
@@ -131,6 +187,32 @@ const styles = StyleSheet.create({
   alertButtonText: {
     color: "#fff",
     fontWeight: "bold",
+  },
+  itemScroll: {
+    maxHeight: 220,
+    marginTop: 8,
+  },
+  
+  itemRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 10,
+    backgroundColor: "#fff",
+    padding: 8,
+    borderRadius: 8,
+  },
+  itemImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 6,
+    marginRight: 10,
+    backgroundColor: "#ccc",
+  },  
+  itemInfo: {
+    flexShrink: 1,
+  }, 
+  pageWrapper: {
+    flex: 1,
   },
 });
 

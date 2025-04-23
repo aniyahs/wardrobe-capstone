@@ -118,3 +118,67 @@ def delete_outfit(outfit_id):
         return jsonify({"message": "Outfit deleted"}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+# Route to get analytics set up
+@outfit_bp.route("/analytics", methods=["GET"])
+def outfit_analytics():
+    from app.database import wardrobe_collection, outfit_collection
+
+    user_id = request.args.get("userId")
+    if not user_id:
+        return jsonify({"error": "Missing userId"}), 400
+
+    # Get all wardrobe items
+    wardrobe_items = list(wardrobe_collection.find({"userId": user_id}))
+    for item in wardrobe_items:
+        item["_id"] = str(item["_id"])
+
+    # Get all saved outfits
+    outfits = list(outfit_collection.find({"userId": user_id}))
+
+    # Build usage stats
+    usage_count = {}
+    color_count_by_type = {}
+    season_usage = {}
+
+    for outfit in outfits:
+        for item in outfit.get("items", []):
+            item_id = str(item["_id"])
+            usage_count[item_id] = usage_count.get(item_id, 0) + 1
+
+            item_type = item.get("type", "Unknown")
+            color = item.get("color", "#000000")
+
+            # Count colors by type
+            if item_type not in color_count_by_type:
+                color_count_by_type[item_type] = {}
+            color_count_by_type[item_type][color] = color_count_by_type[item_type].get(color, 0) + 1
+
+        for season in outfit.get("season", []):
+            season_usage[season] = season_usage.get(season, 0) + 1
+
+    # Organize most worn items by type
+    most_worn_by_type = {}
+    for item in wardrobe_items:
+        item_id = item["_id"]
+        item_type = item.get("type", "Unknown")
+        item["wearCount"] = usage_count.get(item_id, 0)
+
+        if item_type not in most_worn_by_type:
+            most_worn_by_type[item_type] = []
+        most_worn_by_type[item_type].append(item)
+
+    for item_type in most_worn_by_type:
+        most_worn_by_type[item_type].sort(key=lambda x: x["wearCount"], reverse=True)
+
+    # Determine unworn items
+    used_ids = set(usage_count.keys())
+    unworn_items = [item for item in wardrobe_items if item["_id"] not in used_ids]
+
+    return jsonify({
+        "mostWornByType": most_worn_by_type,
+        "mostUsedColors": color_count_by_type,
+        "usageCounts": usage_count,
+        "seasonUsage": season_usage,
+        "unwornItems": unworn_items,
+    })
