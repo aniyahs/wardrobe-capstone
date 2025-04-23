@@ -1,5 +1,7 @@
 from flask import Blueprint, request, jsonify
 from .outfitGenerator import generate_outfit_cps, clothingTypes, defaultWardrobeItems
+from app.database import outfit_collection
+from datetime import datetime
 
 # Create a blueprint for the outfit route
 outfit_bp = Blueprint('outfit_bp', __name__)
@@ -69,3 +71,38 @@ def generate_outfit():
         return jsonify(outfit_list)
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+# Route for saving an outfit 
+@outfit_bp.route('/save-outfit', methods=["POST"])
+def save_outfit():
+    data = request.json
+    user_id = data.get("userId")
+    items = data.get("items")
+    season = data.get("season")
+    formality = data.get("formality")
+
+    if not user_id or not items:
+        return jsonify({"error": "Missing userId or Items"}), 400
+    outfit_doc = {
+        "userId": user_id, 
+        "items": items, 
+        "season": season, 
+        "formality": formality, 
+        "savedAt": datetime.utcnow()
+    }
+    result = outfit_collection.insert_one(outfit_doc)
+    return jsonify({"message": "Outfit Saved", "outfitId": str(result.inserted_id)}), 201
+
+# Route to get saved outfits
+@outfit_bp.route('/saved', methods=['GET'])
+def get_saved_outfits():
+    user_id = request.args.get("userId")
+    if not user_id:
+        return jsonify({"error": "Missing userId"}), 400
+
+    outfits = outfit_collection.find({"userId": user_id}).sort("savedAt", -1)
+    outfit_list = []
+    for outfit in outfits:
+        outfit["_id"] = str(outfit["_id"])
+        outfit_list.append(outfit)
+    return jsonify(outfit_list), 200

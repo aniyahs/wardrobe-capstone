@@ -92,6 +92,42 @@ const OutfitGeneratorScreen = () => {
     );
   };
 
+  const handleSaveOutfit = async () => {
+    try {
+      const userId = await getCurrentUserId();
+      if (!userId || !outfit) {
+        console.log("Please log in or generate an outfit first.");
+        return;
+      }
+      const payload = {
+        userId,
+        items: outfit,
+        season: [season],
+        formality,
+      };
+  
+      const response = await fetch("http://10.0.2.2:5001/outfit/save-outfit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await response.json();
+  
+      if (response.ok) {
+        console.log("✅ Outfit saved successfully!");
+      } else {
+        console.error("❌ Failed to save outfit:", data.error);
+        console.error("Failed to save outfit.");
+      }
+    } catch (err) {
+      console.error("🚨 Unexpected error:", err);
+      console.error("An error occurred while saving.");
+    }
+  };
+  
+
   return (
     <ScrollView contentContainerStyle={styles.mainContainer}>
       <View style={{ paddingTop: 20, marginBottom: 10 }}>
@@ -157,6 +193,16 @@ const OutfitGeneratorScreen = () => {
               {renderOutfitItem(item)}
             </View>
           ))}
+        </View>
+      )}
+
+      {outfit && (
+        <View style={{ marginTop: 20, alignItems: "center" }}>
+          <GradientButton
+            title="Save Outfit"
+            onPress={handleSaveOutfit}
+            size="medium"
+          />
         </View>
       )}
     </ScrollView>
