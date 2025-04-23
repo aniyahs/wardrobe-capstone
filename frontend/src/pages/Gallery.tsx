@@ -90,10 +90,10 @@ function hueCategory(hex: string): number {
 }
 
 const Gallery = () => {
-  const { clothingItems, loading, error, fetchClothingItems } = useClothing();
+  const { clothingItems, loading, error, fetchClothingItems, setClothingItems } = useClothing();
   const [selectedItem, setSelectedItem] = useState<ClothingItem | null>(null);
 
-  // NEW: state for filter modal
+  // state for filter modal
   const [filterVisible, setFilterVisible] = useState(false);
 
   // Filter states
@@ -292,6 +292,7 @@ const Gallery = () => {
   );
 
   // Render each clothing item in the grid
+  // Only the single clothing item that you toggle will refresh rather than the entire page 
   const renderItem = ({ item }: { item: ClothingItem }) => (
     <View style={styles.imageSizeContainer}>
       <TouchableOpacity onPress={() => setSelectedItem(item)}>
@@ -300,10 +301,29 @@ const Gallery = () => {
       <TouchableOpacity
         onPress={async () => {
           try {
-            await toggleFavoriteItem(item._id, !item.favorite);
-            fetchClothingItems();
+            setClothingItems((prevItems: ClothingItem[]) => {
+              const updatedItems = prevItems.map((currentItem: ClothingItem) => {
+                if (currentItem._id === item._id){
+                  return { ...currentItem, favorite: !item.favorite }
+                }
+                return currentItem;
+              });
+              return updatedItems;
+            });
+            await toggleFavoriteItem(item._id, item.favorite);
           } catch (err) {
             console.error("Failed to toggle favorite:", err);
+
+            // If there is an error, it goes back to the previous status 
+            setClothingItems((prevItems: ClothingItem[]) => {
+              const revertedItems = prevItems.map((currentItem: ClothingItem) => {
+                if (currentItem._id === item._id) {
+                  return { ...currentItem, favorite: item.favorite };
+                }
+                return currentItem;
+              });
+              return revertedItems;
+            });
           }
         }}
         style={styles.favoriteButton}
@@ -330,6 +350,7 @@ const Gallery = () => {
         keyExtractor={(item) => item._id}
         numColumns={3}
         renderItem={renderItem}
+        extraData={clothingItems}
         contentContainerStyle={styles.flatListContent}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"

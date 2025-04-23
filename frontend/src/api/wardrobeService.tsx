@@ -22,6 +22,7 @@ interface ClothingContextType {
   loading: boolean;
   error: string | null;
   fetchClothingItems: () => Promise<void>;
+  setClothingItems: React.Dispatch<React.SetStateAction<ClothingItem[]>>;
 }
 
 // Create the context
@@ -65,7 +66,7 @@ export const ClothingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   return (
-    <ClothingContext.Provider value={{ clothingItems, loading, error, fetchClothingItems }}>
+    <ClothingContext.Provider value={{ clothingItems, loading, error, fetchClothingItems, setClothingItems }}>
       {children}
     </ClothingContext.Provider>
   );
@@ -100,7 +101,7 @@ export const deleteClothingItem = async (itemId: string) => {
 
 export const toggleFavoriteItem = async (itemId: string, currentFavorite: boolean) => {
   try {
-    const response = await fetch(`http://10.0.2.2:5001/wardrobe/update/${itemId}`, {
+    const response = await fetch(`http://10.0.2.2:5001/wardrobe/${itemId}/favorite`, {
       method: "PATCH",
       headers: {
         "Content-Type": "application/json",
