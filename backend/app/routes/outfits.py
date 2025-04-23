@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from .outfitGenerator import generate_outfit_cps, clothingTypes, defaultWardrobeItems
 from app.database import outfit_collection
 from datetime import datetime
+from bson import ObjectId
 
 # Create a blueprint for the outfit route
 outfit_bp = Blueprint('outfit_bp', __name__)
@@ -106,3 +107,14 @@ def get_saved_outfits():
         outfit["_id"] = str(outfit["_id"])
         outfit_list.append(outfit)
     return jsonify(outfit_list), 200
+
+# Route to delete a saved outfit 
+@outfit_bp.route('/delete/<outfit_id>', methods=['DELETE'])
+def delete_outfit(outfit_id):
+    try:
+        result = outfit_collection.delete_one({"_id": ObjectId(outfit_id)})
+        if result.deleted_count == 0:
+            return jsonify({"error": "Outfit not found"}), 404
+        return jsonify({"message": "Outfit deleted"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

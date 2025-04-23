@@ -9,6 +9,7 @@ import Gallery from "./src/pages/Gallery";
 import PhotoUpload from "./src/pages/PhotoUpload";
 import Outfit from "./src/pages/OutfitSelector";
 import Profile from "./src/pages/Profile";
+import Home from "./src/pages/Home";
 import Weather from "./src/components/Weather";
 import Background from "./src/components/Background";
 import StyledText from "./src/components/StyledText";
@@ -47,12 +48,7 @@ const App: React.FC<AppProps> = () => {
       case "Landing":
         return <LandingPage setScreen={setScreen} />;
       case "Home":
-        return (
-          <View style={globalStyles.container}>
-            <StyledText size={24} variant="title">Welcome to the Home Screen</StyledText>
-            {/* <Weather /> We got rate limited from too many requests*/}
-          </View>
-        );
+        return <Home />;
       default:
         return (
           <View style={globalStyles.container}>
