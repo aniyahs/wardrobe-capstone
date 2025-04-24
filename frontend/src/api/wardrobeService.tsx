@@ -40,7 +40,11 @@ export const ClothingProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setError(null);
     try {
       const userId = await getCurrentUserId();
-      if (!userId) throw new Error("User not logged in");
+      // instead of returning an error it logs it, this got the landing page to not show the error 
+      if (!userId) {
+        console.log("Skipping wardrobe fetch — no user logged in yet.");
+        return;
+      }
 
       console.log("Fetching clothing items for user:", userId);
       const response = await fetch(`http://10.0.2.2:5001/wardrobe/clothing?userId=${userId}`);

@@ -25,26 +25,41 @@ const Home = () => {
     fetchOutfits();
   }, []);
 
-  const renderOutfit = ({ item }) => (
-    <View style={styles.outfitCard}>
+  const renderOutfit = ({ item }) => {
+    const wearCount = item.wearLog?.length || 0;
+    const lastWorn = wearCount > 0
+      ? new Date(item.wearLog[wearCount - 1]).toLocaleDateString()
+      : "Never";
+
+    return (
+      <View style={styles.outfitCard}>
         <View style={styles.cardHeader}>
-            <Text style={styles.title}>Formality: {item.formality}</Text>
-            <TouchableOpacity onPress={() => handleDeleteOutfit(item._id)}>
-                <Icon name="trash-can-outline" size={24} color="#a00" />
-            </TouchableOpacity>
+          <Text style={styles.title}>Formality: {item.formality}</Text>
+          <TouchableOpacity onPress={() => handleDeleteOutfit(item._id)}>
+            <Icon name="trash-can-outline" size={24} color="#a00" />
+          </TouchableOpacity>
         </View>
-      <Text>Season: {item.season.join(", ")}</Text>
-      <View style={styles.imageRow}>
-        {item.items.map((clothing, idx) => (
-          <Image
-            key={idx}
-            source={{ uri: clothing.imageUrl }}
-            style={styles.clothingImage}
-          />
-        ))}
+        <Text>Season: {item.season.join(", ")}</Text>
+        <View style={styles.imageRow}>
+          {item.items.map((clothing, idx) => (
+            <Image
+              key={idx}
+              source={{ uri: clothing.imageUrl }}
+              style={styles.clothingImage}
+            />
+          ))}
+        </View>
+        <Text style={styles.wearInfo}>Worn: {wearCount} time{wearCount !== 1 ? "s" : ""}</Text>
+        <Text style={styles.wearInfo}>Last worn: {lastWorn}</Text>
+        <TouchableOpacity
+          onPress={() => handleMarkAsWorn(item._id)}
+          style={styles.markWornButton}
+        >
+          <Text style={styles.markWornText}>Mark as Worn</Text>
+        </TouchableOpacity>
       </View>
-    </View>
-  );
+    );
+  };
 
   const handleDeleteOutfit = async (outfitId) => {
     try {
@@ -60,6 +75,40 @@ const Home = () => {
       }
     } catch (err) {
       console.error("Error deleting outfit:", err);
+    }
+  };  
+
+  const handleMarkAsWorn = async (outfitId) => {
+    try {
+      const response = await fetch(`http://10.0.2.2:5001/outfit/mark-worn/${outfitId}`, {
+        method: "PATCH",
+      });
+  
+      let data;
+      const contentType = response.headers.get("Content-Type");
+  
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      } else {
+        const text = await response.text();
+        throw new Error(`Expected JSON, got: ${text.substring(0, 100)}`);
+      }
+  
+      if (response.ok) {
+        console.log("✅ Outfit marked as worn");
+        // Optionally: refresh outfits or update UI
+        setOutfits((prev) =>
+          prev.map((outfit) =>
+            outfit._id === outfitId
+              ? { ...outfit, wearLog: [...(outfit.wearLog || []), new Date()] }
+              : outfit
+          )
+        );
+      } else {
+        console.error("❌ Failed to mark as worn:", data.error);
+      }
+    } catch (err) {
+      console.error("🚨 Network error marking as worn:", err);
     }
   };  
 
@@ -132,5 +181,22 @@ const styles = StyleSheet.create({
         marginRight: 8,
         marginBottom: 8,
         backgroundColor: "#ccc",
+      },
+      wearInfo: {
+        fontSize: 14,
+        color: "#222",
+        marginTop: 6,
+      },
+      markWornButton: {
+        backgroundColor: "#3F342E",
+        paddingVertical: 6,
+        paddingHorizontal: 12,
+        borderRadius: 6,
+        alignSelf: "flex-start",
+        marginTop: 8,
+      },
+      markWornText: {
+        color: "#fff",
+        fontWeight: "bold",
       },
 });

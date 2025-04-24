@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from .outfitGenerator import generate_outfit_cps, clothingTypes, defaultWardrobeItems
-from app.database import outfit_collection
+from app.database import outfit_collection, wardrobe_collection
 from datetime import datetime
 from bson import ObjectId
 
@@ -116,6 +116,32 @@ def delete_outfit(outfit_id):
         if result.deleted_count == 0:
             return jsonify({"error": "Outfit not found"}), 404
         return jsonify({"message": "Outfit deleted"}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+# Route to mark an outfit as 'worn'
+@outfit_bp.route('/mark-worn/<outfit_id>', methods=['PATCH'])
+def mark_outfit_as_worn(outfit_id):
+    try:
+        outfit = outfit_collection.find_one({"_id": ObjectId(outfit_id)})
+        if not outfit:
+            return jsonify({"error": "Outfit not found"}), 404
+
+        # Increment for analytics 
+        for item in outfit.get("items", []):
+            wardrobe_collection.update_one(
+                {"_id": ObjectId(item["_id"])},
+                {
+                    "$inc": {"wearCount": 1},
+                    "$set": {"lastWornDate": datetime.utcnow()}
+                }
+            )
+        outfit_collection.update_one(
+            {"_id": ObjectId(outfit_id)},
+            {"$push": {"wearLog": datetime.utcnow()}}
+        )
+        return jsonify({"message": "Outfit wear logged"}), 200
+
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
