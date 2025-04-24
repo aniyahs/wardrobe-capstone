@@ -4,8 +4,24 @@ import { getCurrentUserId } from "../api/authService";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import StyledText from "../components/StyledText";
 
-const Home = () => {
-  const [outfits, setOutfits] = useState([]);
+interface HomeProps {
+  setScreen: (screen: string) => void;
+}
+
+interface ClothingItem {
+  imageUrl: string;
+}
+
+interface OutfitItem {
+  _id: string;
+  formality: string;
+  season: string[];
+  items: ClothingItem[];
+  wearLog?: string[];
+}
+
+const Home: React.FC<HomeProps> = ({ setScreen }) => {
+  const [outfits, setOutfits] = useState<OutfitItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -25,10 +41,11 @@ const Home = () => {
     fetchOutfits();
   }, []);
 
-  const renderOutfit = ({ item }) => {
+  const renderOutfit = ({ item }: { item: OutfitItem }) => {
+    const wearLog = item.wearLog ?? [];
     const wearCount = item.wearLog?.length || 0;
     const lastWorn = wearCount > 0
-      ? new Date(item.wearLog[wearCount - 1]).toLocaleDateString()
+      ? new Date(wearLog[wearCount - 1]).toLocaleDateString()
       : "Never";
 
     return (
@@ -61,60 +78,67 @@ const Home = () => {
     );
   };
 
-  const handleDeleteOutfit = async (outfitId) => {
+  const handleDeleteOutfit = async (outfitId: string) => {
     try {
       const response = await fetch(`http://10.0.2.2:5001/outfit/delete/${outfitId}`, {
         method: "DELETE",
       });
-  
+
       if (response.ok) {
         setOutfits(prev => prev.filter(o => o._id !== outfitId));
       } else {
         const data = await response.text();
-        console.error("❌ Failed to delete:", data.error);
+        console.error("Failed to delete:", data);
       }
     } catch (err) {
       console.error("Error deleting outfit:", err);
     }
-  };  
+  };
 
-  const handleMarkAsWorn = async (outfitId) => {
+  const handleMarkAsWorn = async (outfitId: string) => {
     try {
       const response = await fetch(`http://10.0.2.2:5001/outfit/mark-worn/${outfitId}`, {
         method: "PATCH",
       });
-  
+
       let data;
       const contentType = response.headers.get("Content-Type");
-  
+
       if (contentType && contentType.includes("application/json")) {
         data = await response.json();
       } else {
         const text = await response.text();
         throw new Error(`Expected JSON, got: ${text.substring(0, 100)}`);
       }
-  
+
       if (response.ok) {
-        console.log("✅ Outfit marked as worn");
-        // Optionally: refresh outfits or update UI
+        console.log("Outfit marked as worn");
         setOutfits((prev) =>
           prev.map((outfit) =>
             outfit._id === outfitId
-              ? { ...outfit, wearLog: [...(outfit.wearLog || []), new Date()] }
+              ? { ...outfit, wearLog: [...(outfit.wearLog || []), new Date().toISOString()] }
               : outfit
           )
         );
       } else {
-        console.error("❌ Failed to mark as worn:", data.error);
+        console.error("Failed to mark as worn:", data.error);
       }
     } catch (err) {
-      console.error("🚨 Network error marking as worn:", err);
+      console.error("Network error marking as worn:", err);
     }
-  };  
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <StyledText size={32} variant="title">Saved Outfits</StyledText>
+
+      <TouchableOpacity
+        onPress={() => setScreen("CustomOutfitBuilder")}
+        style={styles.buildButton}
+      >
+        <Text style={styles.buildButtonText}>Build Your Own Outfit</Text>
+      </TouchableOpacity>
+
       {loading ? (
         <Text style={styles.subText}>Loading...</Text>
       ) : outfits.length === 0 ? (
@@ -126,7 +150,7 @@ const Home = () => {
           renderItem={renderOutfit}
           contentContainerStyle={styles.flatListContainer}
           showsVerticalScrollIndicator={false}
-          scrollEnabled={false} 
+          scrollEnabled={false}
         />
       )}
     </ScrollView>
@@ -136,67 +160,87 @@ const Home = () => {
 export default Home;
 
 const styles = StyleSheet.create({
-    container: {
-        alignItems: "center",
-        paddingVertical: 24,
-        paddingHorizontal: 12,
-        backgroundColor: "#2D2D2D",
-        flexGrow: 1,
-      },
-      subText: {
-        color: "#CCC",
-        textAlign: "center",
-        marginTop: 10,
-        marginBottom: 20,
-      },
-      flatListContainer: {
-        width: "100%",
-        paddingBottom: 40,
-      },
-      outfitCard: {
-        backgroundColor: "#999",
-        padding: 12,
-        marginBottom: 16,
-        borderRadius: 10,
-        shadowColor: "#000",
-        shadowOpacity: 0.2,
-        shadowOffset: { width: 0, height: 2 },
-        shadowRadius: 4,
-      },
-      cardHeader: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 6,
-      },
-      imageRow: {
-        flexDirection: "row",
-        flexWrap: "wrap",
-        marginTop: 6,
-      },
-      clothingImage: {
-        width: 70,
-        height: 70,
-        borderRadius: 6,
-        marginRight: 8,
-        marginBottom: 8,
-        backgroundColor: "#ccc",
-      },
-      wearInfo: {
-        fontSize: 14,
-        color: "#222",
-        marginTop: 6,
-      },
-      markWornButton: {
-        backgroundColor: "#3F342E",
-        paddingVertical: 6,
-        paddingHorizontal: 12,
-        borderRadius: 6,
-        alignSelf: "flex-start",
-        marginTop: 8,
-      },
-      markWornText: {
-        color: "#fff",
-        fontWeight: "bold",
-      },
+  container: {
+    alignItems: "center",
+    paddingVertical: 24,
+    paddingHorizontal: 12,
+    backgroundColor: "#2D2D2D",
+    flexGrow: 1,
+  },
+  subText: {
+    color: "#CCC",
+    textAlign: "center",
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  flatListContainer: {
+    width: "100%",
+    paddingBottom: 40,
+  },
+  outfitCard: {
+    backgroundColor: "#999",
+    padding: 12,
+    marginBottom: 16,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowOffset: { width: 0, height: 2 },
+    shadowRadius: 4,
+  },
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 6,
+  },
+  imageRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    marginTop: 6,
+  },
+  clothingImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 6,
+    marginRight: 8,
+    marginBottom: 8,
+    backgroundColor: "#ccc",
+  },
+  wearInfo: {
+    fontSize: 14,
+    color: "#222",
+    marginTop: 6,
+  },
+  markWornButton: {
+    backgroundColor: "#3F342E",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    alignSelf: "flex-start",
+    marginTop: 8,
+  },
+  markWornText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  buildButton: {
+    backgroundColor: "#3F342E",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    marginTop: 10,
+    marginBottom: 16,
+    alignSelf: "center",
+  },
+  buildButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#222",
+    marginBottom: 4,
+  },
 });

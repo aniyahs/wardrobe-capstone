@@ -9,13 +9,14 @@ interface GradientButtonProps {
   title: string;
   subtitle?: string;
   onPress: () => void;
-  size?: ButtonSize; // ✅ Default to 'large'
+  size?: ButtonSize; 
   style?: StyleProp<ViewStyle>;
+  disabled?: boolean;
 }
 
-const GradientButton: React.FC<GradientButtonProps> = ({ title, subtitle, onPress, size = "large", style }) => {
+const GradientButton: React.FC<GradientButtonProps> = ({ title, subtitle, onPress, size = "large", style, disabled }) => {
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={[styles.shadowContainer, style]}>
+    <TouchableOpacity onPress={onPress} activeOpacity={0.8} style={[styles.shadowContainer, style, disabled && styles.disabledButton]}>
       {/* Fake Shadow Layer for Android */}
       {Platform.OS === "android" && <View style={[styles.androidShadow, buttonSizes[size].shadow]} />}
 
@@ -25,7 +26,7 @@ const GradientButton: React.FC<GradientButtonProps> = ({ title, subtitle, onPres
           colors={["#6C6A67", "#3F342E"]}
           start={{ x: 0.75, y: 1 }}
           end={{ x: 0.25, y: 0 }}
-          style={{ ...(buttonSizes[size].button as ViewStyle) }} // ✅ Fix TypeScript Error
+          style={{ ...(buttonSizes[size].button as ViewStyle) }} 
         >
           {/* Overlay with 83% Opacity */}
           <View style={[styles.overlay, { borderRadius: buttonSizes[size].button.borderRadius }]} />
@@ -39,7 +40,7 @@ const GradientButton: React.FC<GradientButtonProps> = ({ title, subtitle, onPres
   );
 };
 
-/** ✅ Button size configurations */
+/** Button size configurations */
 const buttonSizes = {
   small: {
     button: {
@@ -106,7 +107,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  /** ✅ Fake Shadow Layer for Android */
+  /** Fake Shadow Layer for Android */
   androidShadow: {
     position: "absolute",
     backgroundColor: "rgba(0, 0, 0, 0.4)", // Super dark black shadow
@@ -135,6 +136,10 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "#3F342E",
     opacity: 0.83,
+  },
+
+  disabledButton: {
+    opacity: 0.5,
   },
 });
 

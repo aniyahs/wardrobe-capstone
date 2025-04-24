@@ -15,6 +15,7 @@ import Background from "./src/components/Background";
 import StyledText from "./src/components/StyledText";
 import { globalStyles } from "./src/styles/styles";
 import { ClothingProvider } from "./src/api/wardrobeService";
+import CustomOutfitBuilder from "./src/pages/CustomOutfitBuilder";
 
 interface AppProps {
   setScreen: (screen: string) => void;
@@ -48,7 +49,9 @@ const App: React.FC<AppProps> = () => {
       case "Landing":
         return <LandingPage setScreen={setScreen} />;
       case "Home":
-        return <Home />;
+        return <Home setScreen={setScreen}/>;
+      case "CustomOutfitBuilder":
+        return <CustomOutfitBuilder setScreen={setScreen} />;        
       default:
         return (
           <View style={globalStyles.container}>
