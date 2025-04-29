@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity } from "react-native";
 import { globalStyles } from "../styles/styles";
-import { signupUser } from "../api/authService"; // Import signup API
+import { signupUser } from "../api/authService";
 import StyledText from "../components/StyledText";
 import GradientButton from "../components/GradientButton"
 
@@ -19,7 +19,7 @@ const Signup = ({ setScreen }: { setScreen: (screen: string) => void }) => {
 
         try {
             const response = await signupUser(username, email, password);
-            setMessage(response.message); // Show success message
+            setMessage(response.message); 
             setTimeout(() => setScreen("Login"), 1500); // Redirect to login
         } catch (error) {
             setMessage(error instanceof Error ? error.message : "Signup failed");
