@@ -17,11 +17,8 @@ import { Picker } from "@react-native-picker/picker";
 import  ColorPicker  from "react-native-wheel-color-picker";
 import { predictTags } from "../api/predictService";
 import StyledText from "../components/StyledText";
-import { LogBox } from 'react-native';
 
-LogBox.ignoreLogs([
-  'This method is deprecated (as well as all React Native Firebase namespaced API)',
-]);
+
 
 const PhotoUpload = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -209,28 +206,6 @@ const PhotoUpload = () => {
 
       setStep("tags");
       console.log("🏁 Finished handleUpload!");
-
-      // Now after prediction and setting values, save to Mongo
-      // const itemData = {
-      //   userId,
-      //   photoUrl: downloadUrl,
-      //   type: mappedType,
-      //   style: matchedStyle,
-      //   color: colorValue,
-      //   texture: patternValue,
-      //   formality: "Casual",
-      //   size: "M",
-      //   favorite: false,
-      //   season: selectedSeason.length > 0 ? selectedSeason : ["Summer", "Fall", "Winter", "Spring"],
-      // };
-
-      // console.log("📡 Saving item:", itemData);
-      // await savePhotoUrl(itemData);
-
-      // Alert.alert("Success", "Item uploaded and saved!");
-      // setSelectedImage(null);
-      // setPickerValues(Array(9).fill(""));
-      // setSelectedSeason([]);
 
     } catch (err) {
       console.error("❌ Upload failed:", err);

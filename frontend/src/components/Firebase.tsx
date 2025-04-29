@@ -12,6 +12,7 @@
     } from "react-native";
     import storage from '@react-native-firebase/storage';
     import { launchImageLibrary, MediaType, PhotoQuality, Asset } from 'react-native-image-picker';
+import { getApp } from "@react-native-firebase/app";
 
 
     // Utility to extract filename from path
@@ -22,7 +23,7 @@
     // Upload image to Firebase Storage
     export const uploadImageToStorage = async (path: string): Promise<string> => {
         const fileName = getFileNameFromPath(path);
-        const reference = storage().ref(fileName);
+        const reference = storage(getApp()).ref(path);
 
         try {
             await reference.putFile(path);
