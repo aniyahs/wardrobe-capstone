@@ -17,7 +17,11 @@ import { Picker } from "@react-native-picker/picker";
 import  ColorPicker  from "react-native-wheel-color-picker";
 import { predictTags } from "../api/predictService";
 import StyledText from "../components/StyledText";
+import { LogBox } from 'react-native';
 
+LogBox.ignoreLogs([
+  'This method is deprecated (as well as all React Native Firebase namespaced API)',
+]);
 
 const PhotoUpload = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);

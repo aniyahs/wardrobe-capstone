@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
         shadowRadius: 16,
       },
       android: {
-        elevation: 20, // Still needed for soft shadow
+        elevation: 0, // Still needed for soft shadow
       },
     }),
   },

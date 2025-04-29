@@ -134,7 +134,7 @@ const OutfitGeneratorScreen = () => {
         <StyledText size={32} variant="title">Outfit Generator</StyledText>
       </View>
       
-      {/*<Weather onWeatherFetched={(w) => setWeather(w)} />*/}
+      <Weather onWeatherFetched={(w) => setWeather(w)} />
 
       <View style={{ alignItems: "center", marginBottom: 10 }}>
         <View style={styles.dropShadow} />

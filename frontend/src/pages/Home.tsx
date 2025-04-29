@@ -3,6 +3,7 @@ import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, ScrollView }
 import { getCurrentUserId } from "../api/authService";
 import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import StyledText from "../components/StyledText";
+import GradientButton from "../components/GradientButton";
 
 interface HomeProps {
   setScreen: (screen: string) => void;
@@ -135,13 +136,12 @@ const Home: React.FC<HomeProps> = ({ setScreen }) => {
     showsHorizontalScrollIndicator={false}>
       <StyledText size={32} variant="title">Saved Outfits</StyledText>
 
-      <TouchableOpacity
+      <GradientButton
+        title="Build Your Own Outfit"
         onPress={() => setScreen("CustomOutfitBuilder")}
-        style={styles.buildButton}
-      >
-        <Text style={styles.buildButtonText}>Build Your Own Outfit</Text>
-      </TouchableOpacity>
-
+        size="medium"
+        style={{ marginBottom: 20 }}
+      />
       {loading ? (
         <Text style={styles.subText}>Loading...</Text>
       ) : outfits.length === 0 ? (
