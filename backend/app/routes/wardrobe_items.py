@@ -2,16 +2,13 @@
 from flask import Blueprint, request, jsonify, session
 from app.database import wardrobe_collection
 from bson import ObjectId
-#from auth import login_required
 
 wardrobe_bp = Blueprint("wardrobe", __name__)
 
 # Add a new wardrobe item 
 @wardrobe_bp.route("/add-item", methods=["POST"])
-#@login_required
 def add_item():
     data = request.json
-    
     item = {
     "userId": data["userId"],
     "photoUrl": data["photoUrl"],
@@ -19,19 +16,17 @@ def add_item():
     "style": data["style"],
     "color": data["color"],
     "texture": data["texture"],
-    "season": data["season"],         # should be an array
+    "season": data["season"],        
     "formality": data["formality"],
     "size": data["size"],
-    "favorite": data["favorite"],     # should be boolean
+    "favorite": data["favorite"],     
 }
-
     
     result = wardrobe_collection.insert_one(item)
     return jsonify({"message": "Item added", "item_id": str(result.inserted_id)}), 201
 
 # Get a specific wardrobe item by ID
 @wardrobe_bp.route("/<item_id>", methods=["GET"])
-#@login_required
 def get_wardrobe_item(item_id):
     user_id = session.get("user_id")
     item = wardrobe_collection.find_one({"_id": ObjectId(item_id), "user_id": user_id})
@@ -44,7 +39,6 @@ def get_wardrobe_item(item_id):
 
 # Update a wardrobe item 
 @wardrobe_bp.route("/<item_id>", methods=["PUT"])
-#@login_required
 def update_wardrobe_item(item_id):
     user_id = session.get("user_id")
     data = request.json
@@ -63,7 +57,6 @@ def update_wardrobe_item(item_id):
 
 # Delete a wardrobe item 
 @wardrobe_bp.route("/delete/<item_id>", methods=["DELETE"])
-#@login_required
 def delete_wardrobe_item(item_id):
     user_id = session.get("user_id")
     deleted_item = wardrobe_collection.find_one_and_delete(
@@ -75,7 +68,7 @@ def delete_wardrobe_item(item_id):
 
     return jsonify({"message": "Item deleted successfully"}), 200
 
-# Get all wardrobe items for a user (or optionally everyone)
+# Get all wardrobe items for a user 
 @wardrobe_bp.route("/clothing", methods=["GET"])
 def get_all_wardrobe_items():
     try:
@@ -85,11 +78,9 @@ def get_all_wardrobe_items():
         else:
             items = wardrobe_collection.find()
         
-       
         item_list = []
         for item in items:
             item["_id"] = str(item["_id"])
-            # Normalize image field from different keys
             item["imageUrl"] = item.get("image_url") or item.get("photoUrl") or ""
             item_list.append(item)
         return jsonify(item_list), 200
@@ -97,7 +88,7 @@ def get_all_wardrobe_items():
         print("Error fetching wardrobe items:", e)
         return jsonify({"error": "Error fetching wardrobe items"}), 500
     
-    # Toggle favorite status
+# Toggle favorite status
 @wardrobe_bp.route("/<item_id>/favorite", methods=["PATCH"])
 def toggle_favorite(item_id):
     data = request.get_json()
