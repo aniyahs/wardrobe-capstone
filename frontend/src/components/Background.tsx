@@ -12,7 +12,7 @@ const Background: React.FC = () => {
       <ImageBackground
         source={require("../assets/images/Background.png")}
         style={{ flex: 1 }}
-        resizeMode="cover"  // or "contain" depending on style
+        resizeMode="cover"  
       >
       </ImageBackground>
     </View>

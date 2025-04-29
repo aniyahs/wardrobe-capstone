@@ -165,14 +165,11 @@ const PhotoUpload = () => {
       if (!userId) throw new Error("User not logged in");
 
       // for predicting the tags
-      //setIsPredicting(true);
       console.log("🔮 Predicting tags...");
       const predictedTags = await predictTags(downloadUrl);
       console.log('🎯 Predicted tags:', predictedTags);
-      //setIsPredicting(false);
 
       const predictedStyle = predictedTags.type || "T-Shirt";   
-      //const colorValue = predictedTags.color || "#000000";
       const patternValue = predictedTags.pattern || "Solid";
 
       console.log("🛠️ Setting predicted values...");
@@ -197,8 +194,8 @@ const PhotoUpload = () => {
         updated[0] = mappedType;
         updated[1] = matchedStyle;
         updated[2] = selectedHexColor;
-        updated[3] = autoTexture;      // ⬅️ From styleInfoMap
-        updated[5] = autoFormality;    // ⬅️ From styleInfoMap
+        updated[3] = autoTexture;      
+        updated[5] = autoFormality;    
         updated[6] = "M";
         updated[8] = "No";
         return updated;
@@ -308,11 +305,11 @@ const PhotoUpload = () => {
                       row={false}
                       swatches={true}
                       swatchesLast={true}
-                      discrete={false} // use smooth slider
-                      autoResetSlider={false} // keep current lightness when moving on wheel
-                      shadeWheelThumb={true} // show thumb color on the wheel
-                      shadeSliderThumb={true} // show thumb color on the slider
-                      useNativeDriver={true} // for better performance
+                      discrete={false} 
+                      autoResetSlider={false} 
+                      shadeWheelThumb={true} 
+                      shadeSliderThumb={true} 
+                      useNativeDriver={true} 
                       palette={[
                         "#fdf6e3",
                         "#f5e8d0",
@@ -369,8 +366,6 @@ const PhotoUpload = () => {
                       onChange={value => {
                         setSelectedType(value);
                         updatePickerValue(0, value);
-
-                        // Auto-set style to first style of selected type
                         const stylesForType = typeToStylesMap[value];
                         if (stylesForType && stylesForType.length > 0) {
                           updatePickerValue(1, stylesForType[0]);
@@ -453,7 +448,7 @@ const styles = StyleSheet.create({
   dropShadowSmall: {
     position: "absolute",
     bottom: -3,
-    width: '100%', // Let it auto-match the button width
+    width: '100%', 
     height: 6,
     backgroundColor: "rgba(0, 0, 0, 0.4)",
     borderBottomLeftRadius: 10,

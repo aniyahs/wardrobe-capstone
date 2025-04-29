@@ -20,7 +20,7 @@ const Signup = ({ setScreen }: { setScreen: (screen: string) => void }) => {
         try {
             const response = await signupUser(username, email, password);
             setMessage(response.message); 
-            setTimeout(() => setScreen("Login"), 1500); // Redirect to login
+            setTimeout(() => setScreen("Login"), 1500);
         } catch (error) {
             setMessage(error instanceof Error ? error.message : "Signup failed");
         }

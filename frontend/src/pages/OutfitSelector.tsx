@@ -39,7 +39,7 @@ const OutfitGeneratorScreen = () => {
       if (!userId) throw new Error("User not logged in");
 
       if (!clothingItems || clothingItems.length === 0) {
-        await fetchClothingItems(); // Fetch again if not loaded
+        await fetchClothingItems(); 
       }
 
       const payload = {
@@ -54,7 +54,6 @@ const OutfitGeneratorScreen = () => {
       axios
         .post('http://10.0.2.2:5001/outfit/generate-outfit', payload)
         .then(response => {
-          // The backend returns an array of wardrobe items
           setOutfit(response.data);
         })
         .catch(error => {

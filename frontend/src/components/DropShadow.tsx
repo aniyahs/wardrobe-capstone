@@ -9,10 +9,10 @@ import {
 
 interface BottomShadowProps {
   children: React.ReactNode;
-  style?: StyleProp<ViewStyle>;      // Style for the outer container
-  contentStyle?: StyleProp<ViewStyle>; // Style for the content container (e.g., backgroundColor)
-  shadowStyle?: StyleProp<ViewStyle>;  // Additional shadow style overrides
-  borderRadius?: number;               // To round the bottom corners of the shadow & content
+  style?: StyleProp<ViewStyle>;     
+  contentStyle?: StyleProp<ViewStyle>; 
+  shadowStyle?: StyleProp<ViewStyle>;  
+  borderRadius?: number;              
 }
 
 const BottomShadow: React.FC<BottomShadowProps> = ({
@@ -55,18 +55,16 @@ const BottomShadow: React.FC<BottomShadowProps> = ({
 
 const styles = StyleSheet.create({
   wrapper: {
-    alignItems: "center", // Centers the content horizontally
+    alignItems: "center", 
   },
-  // Android shadow: a fake view underneath the content
   androidShadow: {
     position: "absolute",
     bottom: 0,
-    width: "90%",      // Adjust based on how wide you want the shadow relative to your content
-    height: 8,         // Height of the shadow effect
+    width: "90%",      
+    height: 8,         
     backgroundColor: "rgba(0,0,0,0.4)",
     zIndex: -1,
   },
-  // iOS shadow is applied directly to the content container
   iosShadow: {
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 8 },
@@ -74,9 +72,7 @@ const styles = StyleSheet.create({
     shadowRadius: 10,
   },
   content: {
-    // Default backgroundColor can be overwritten by contentStyle
     backgroundColor: "#3F342E",
-    // Padding and other styling can be applied here or passed via contentStyle
   },
 });
 

@@ -10,7 +10,7 @@ interface StyledTextProps extends TextProps {
 const StyledText: React.FC<StyledTextProps> = ({ size, variant = "title", style, children, ...props }) => {
   return (
     <Text
-      style={[styles[variant], { fontSize: size }, style]} // Apply dynamic font size
+      style={[styles[variant], { fontSize: size }, style]}
       {...props}
     >
       {children}

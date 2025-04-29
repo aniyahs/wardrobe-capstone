@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     position: "absolute",
-    bottom: 30, // Ensure proper placement at the bottom
+    bottom: 30, 
     width: "100%",
     ...Platform.select({
       ios: {
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
         shadowRadius: 16,
       },
       android: {
-        elevation: 20, // Stronger shadow for Android
+        elevation: 2, 
       },
     }),
   },
@@ -64,21 +64,21 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     alignItems: "center",
     width: "100%",
-    height: 46, // Shorter height as per request
+    height: 46, 
     borderRadius: 28,
     paddingHorizontal: 5,
   },
   /** ✅ Fake Shadow Layer for Android */
   androidShadow: {
     position: "absolute",
-    width: "90%", // Matches the navbar width
-    height: 46, // Matches the navbar height
+    width: "90%",
+    height: 46, 
     borderRadius: 28,
-    backgroundColor: "rgba(0, 0, 0, 0.6)", // Super dark shadow
-    bottom: -5, // Keeps it slightly below for depth
-    left: "5%", // Centers the shadow (since width is 90%)
-    right: "5%", // Ensures it's evenly distributed
-    zIndex: -1, // Places it behind the navbar
+    backgroundColor: "rgba(0, 0, 0, 0.6)", 
+    bottom: -5, 
+    left: "5%", 
+    right: "5%",
+    zIndex: -1, 
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,

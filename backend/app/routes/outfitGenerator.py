@@ -115,10 +115,9 @@ def is_valid_hex_color(color):
 
 def generate_outfit_cps(season, formality, wardrobeItems, temperature=None, weathercode=None, userId=None):
     wardrobeItems = [
-    item for item in wardrobeItems
-    if is_valid_hex_color(item.get("color", ""))
-]
-    # Do something
+        item for item in wardrobeItems
+        if is_valid_hex_color(item.get("color", ""))
+    ]
 
     tops_candidates = [item for item in wardrobeItems if item['type'] == 'Tops']
     bottoms_candidates = [item for item in wardrobeItems if item['type'] == 'Bottoms']
@@ -200,25 +199,25 @@ def generate_outfit_cps(season, formality, wardrobeItems, temperature=None, weat
         if temp_formality: 
             penalties.append("Formality mismatch detected.")
 
-        # 🧥 Require base layer if under 50°F
+        # Require base layer if under 50°F
         if temperature is not None and temperature < 50:
             has_layer = any(i['type'] in clothingTypes['outerwear'] for i in outfit)
             if not has_layer:
                 penalty += 5
 
-        # ☀️ Penalize layers if over 75°F
+        # Penalize layers if over 75°F
         if temperature is not None and temperature > 75:
             layers = [i for i in outfit if i['type'] in clothingTypes['outerwear']]
             penalty += len(layers) * 5
 
-        # 🌫 Prefer cooler tones on overcast/fog
+        # Prefer cooler tones on overcast/fog
         if weathercode in [3, 45, 48]:
             for item in outfit:
                 h, _, _ = hexToHSV(item)
                 if not (180 <= h <= 300):
                     penalty += 1
 
-        # ☀️ Prefer warm tones on sunny
+        # Prefer warm tones on sunny
         if weathercode in [0, 1, 2]:
             for item in outfit:
                 h, _, _ = hexToHSV(item)

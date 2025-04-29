@@ -323,12 +323,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   formalityTextSelected: {
-    color: "#F5F5F5", // pure white when selected
+    color: "#F5F5F5", 
     fontWeight: "bold",
   },
   
   seasonTextSelected: {
-    color: "#F5F5F5", // pure white when selected
+    color: "#F5F5F5",
     fontWeight: "bold",
   },
 });

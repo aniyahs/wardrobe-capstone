@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   /** Fake Shadow Layer for Android */
   androidShadow: {
     position: "absolute",
-    backgroundColor: "rgba(0, 0, 0, 0.4)", // Super dark black shadow
+    backgroundColor: "rgba(0, 0, 0, 0.4)", 
     left: 0,
     right: 0,
     zIndex: -1,
@@ -125,9 +125,6 @@ const styles = StyleSheet.create({
         shadowOffset: { width: 0, height: 10 },
         shadowOpacity: 0.7,
         shadowRadius: 16,
-      },
-      android: {
-        elevation: 0, // Still needed for soft shadow
       },
     }),
   },

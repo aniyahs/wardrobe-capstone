@@ -48,7 +48,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     position: "absolute",
-    top: 20, // ✅ Ensures placement at the top
+    top: 20, 
     width: "100%",
     ...Platform.select({
       ios: {
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
         shadowRadius: 16,
       },
       android: {
-        elevation: 20, // ✅ Stronger shadow for Android
+        elevation: 2, 
       },
     }),
   },
@@ -71,7 +71,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between", // ✅ Ensures left, center, and right alignment
+    justifyContent: "space-between", 
     width: "100%",
     height: 46,
     borderRadius: 28,
@@ -83,8 +83,8 @@ const styles = StyleSheet.create({
     width: "90%",
     height: 46,
     borderRadius: 28,
-    backgroundColor: "rgba(0, 0, 0, 0.6)", // ✅ Super dark shadow
-    bottom: -5, // ✅ Ensures proper elevation effect
+    backgroundColor: "rgba(0, 0, 0, 0.6)", 
+    bottom: -5, 
     left: "5%",
     right: "5%",
     zIndex: -1,
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
   },
   sideSpacer: {
-    width: 30, // ✅ Placeholder for left spacing
+    width: 30, 
   },
   headerText: {
     fontSize: 24,
@@ -106,10 +106,10 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 5,
     textAlign: "center",
-    flex: 1, // ✅ Ensures text remains centered even when image is added
+    flex: 1, 
   },
   imagePlaceholder: {
-    width: 30, // ✅ Same width as left spacer for symmetry
+    width: 30, 
     height: 30,
     justifyContent: "center",
     alignItems: "center",
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
   profileImage: {
     width: 30,
     height: 30,
-    borderRadius: 15, // ✅ Circular image
+    borderRadius: 15, 
   },
 });
 
