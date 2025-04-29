@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, Image, FlatList, StyleSheet, ScrollView }
 import { useClothing } from "../api/wardrobeService";
 import { getCurrentUserId } from "../api/authService";
 import GradientButton from "../components/GradientButton";
-import { StackNavigationProp } from '@react-navigation/stack';
+import StyledText from "../components/StyledText";
 
 interface WardrobeItem {
   _id: string;
@@ -89,50 +89,55 @@ const CustomOutfitBuilder: React.FC<Props> = ({ setScreen }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Build Your Own Outfit</Text>
+      <StyledText size={32} variant="title">Build Your Own Outfit</StyledText>
       <View style={styles.pickerSection}>
         <Text style={styles.section}>Select Formality</Text>
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-            {["Casual", "Business Casual", "Formal", "Smart Casual"].map((option) => (
-            <TouchableOpacity
+        {["Casual", "Business Casual", "Formal", "Smart Casual"].map((option) => {
+            const isSelected = formality === option;
+            return (
+              <TouchableOpacity
                 key={option}
                 onPress={() => setFormality(option)}
                 style={[
-                styles.formalityButton,
-                formality === option && styles.formalitySelected
+                  styles.formalityButton,
+                  isSelected && styles.formalitySelected
                 ]}
-            >
-                <Text style={styles.formalityText}>{option}</Text>
-            </TouchableOpacity>
-            ))}
+              >
+                <Text style={[styles.formalityText, isSelected && styles.formalityTextSelected]}>
+                  {option}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </ScrollView>
         </View>
 
         <View style={styles.pickerSection}>
-  <Text style={styles.section}>Select Seasons</Text>
-  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-    {["Summer", "Spring", "Fall", "Winter"].map((season) => {
+          <Text style={styles.section}>Select Seasons</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            {["Summer", "Spring", "Fall", "Winter"].map((season) => {
             const isSelected = selectedSeasons.includes(season);
             return (
-                <TouchableOpacity
+              <TouchableOpacity
                 key={season}
                 onPress={() =>
-                    setSelectedSeasons((prev) =>
-                    isSelected
-                        ? prev.filter((s) => s !== season)
-                        : [...prev, season]
-                    )
+                  setSelectedSeasons((prev) =>
+                    isSelected ? prev.filter((s) => s !== season) : [...prev, season]
+                  )
                 }
                 style={[
-                    styles.seasonButton,
-                    isSelected && styles.seasonSelected
+                  styles.seasonButton,
+                  isSelected && styles.seasonSelected
                 ]}
-                >
-                <Text style={styles.seasonText}>{season}</Text>
-                </TouchableOpacity>
+              >
+                <Text style={[styles.seasonText, isSelected && styles.seasonTextSelected]}>
+                  {season}
+                </Text>
+              </TouchableOpacity>
             );
-            })}
-        </ScrollView>
+          })}
+          </ScrollView>
         </View>
 
         {clothingTypes.map((type) => (
@@ -150,21 +155,24 @@ const CustomOutfitBuilder: React.FC<Props> = ({ setScreen }) => {
             </View>
             </View>
         ))}
-        <View style={styles.previewPane}>
-            <Text style={styles.previewTitle}>Outfit Preview</Text>
-            <View style={styles.previewGrid}>
-                {Object.entries(selectedItems).map(([type, item]) => (
-                <View key={type} style={styles.previewItem}>
-                    {item ? (
-                    <Image source={{ uri: item.imageUrl }} style={styles.previewImage} />
-                    ) : (
-                    <View style={[styles.previewImage, styles.missingImage]} />
-                    )}
-                    <Text style={styles.previewLabel}>{type}</Text>
-                </View>
-                ))}
+        <View style={{ alignItems: "center", marginTop: 20 }}>
+          <View style={styles.previewPane}>
+              <Text style={styles.previewTitle}>Outfit Preview</Text>
+              <View style={styles.previewGrid}>
+                  {Object.entries(selectedItems).map(([type, item]) => (
+                  <View key={type} style={styles.previewItem}>
+                      {item ? (
+                      <Image source={{ uri: item.imageUrl }} style={styles.previewImage} />
+                      ) : (
+                      <View style={[styles.previewImage, styles.missingImage]} />
+                      )}
+                      <Text style={styles.previewLabel}>{type}</Text>
+                  </View>
+                  ))}
+              </View>
             </View>
-            </View>
+        </View>
+        
 
 
 
@@ -183,8 +191,7 @@ const CustomOutfitBuilder: React.FC<Props> = ({ setScreen }) => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
-    backgroundColor: "#f5f5f5",
+    padding: 35,
   },
   title: {
     fontSize: 24,
@@ -197,6 +204,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginTop: 20,
     marginBottom: 10,
+    color: "#f5f5f5",
   },
   itemCard: {
     marginRight: 12,
@@ -229,6 +237,7 @@ const styles = StyleSheet.create({
     padding: 10,
     backgroundColor: "#eee",
     borderRadius: 10,
+    width: "50%",
   },
   previewTitle: {
     fontSize: 18,
@@ -311,6 +320,15 @@ const styles = StyleSheet.create({
   
   seasonText: {
     color: "#000",
+    fontWeight: "bold",
+  },
+  formalityTextSelected: {
+    color: "#F5F5F5", // pure white when selected
+    fontWeight: "bold",
+  },
+  
+  seasonTextSelected: {
+    color: "#F5F5F5", // pure white when selected
     fontWeight: "bold",
   },
 });

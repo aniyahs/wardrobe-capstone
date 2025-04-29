@@ -129,7 +129,10 @@ const Home: React.FC<HomeProps> = ({ setScreen }) => {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <ScrollView 
+    contentContainerStyle={styles.container}
+    showsVerticalScrollIndicator={false}
+    showsHorizontalScrollIndicator={false}>
       <StyledText size={32} variant="title">Saved Outfits</StyledText>
 
       <TouchableOpacity
@@ -161,10 +164,10 @@ export default Home;
 
 const styles = StyleSheet.create({
   container: {
+    paddingTop: 40,
     alignItems: "center",
     paddingVertical: 24,
     paddingHorizontal: 12,
-    backgroundColor: "#2D2D2D",
     flexGrow: 1,
   },
   subText: {
@@ -240,7 +243,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "#222",
+    color: "#2D2D2D",
     marginBottom: 4,
   },
 });
